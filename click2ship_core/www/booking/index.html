@@ -1,0 +1,587 @@
+{% extends "click2ship_core/templates/layout.html" %}
+
+{% block content %}
+    <div class="container">
+<div id="cached-bookings"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    fetch("/api/method/click2ship_core.api.call.session_data")
+        .then(res => res.json())
+        .then(result => {
+            const container = document.getElementById("cached-bookings");
+
+            if(result.message){
+                const data = result.message;
+                if(Object.keys(data).length === 0){
+                    container.innerHTML = "<p>No booking data in cache.</p>";
+                } else {
+                    container.innerHTML = "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
+                }
+            }
+        })
+        .catch(err => console.error("Error fetching cached booking:", err));
+});
+</script>
+
+        <div class="quote-header"><h2>Book Your Delivery</h2></div>
+    </div>
+    <div class="container">
+        <!-- Quote Summary -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="quote-wrapper">
+                    <div class="quote-item">
+                        <div class="flex-100">
+                            <img src="/assets/click2ship_core/courier_logos/C2S.png"
+                                 alt="Service Logo"
+                                 style="max-height: 60px;"
+                                 onerror="this.onerror=null; this.src='/assets/click2ship_core/courier_logos/{{ selected_quote.quote.ServiceCode }}.png';">
+                        </div>
+                        <div class="flex-200">
+                            <div class="quote-item-title">{{ selected_quote.quote.ServiceName }}</div>
+                            <div class="quote-item-desc">Adult Signature Required</div>
+                        </div>
+                        <div class="flex-100">
+                            <div class="quote-item-title">£{{ "{:.2f}".format(selected_quote.quote.TotalCost) }}</div>
+                            <div class="quote-item-desc">inclusive of VAT</div>
+                        </div>
+                        <div class="flex-150">
+                            <div class="quote-item-desc text-red">
+                                Delivery expected by<br>{{ selected_quote.quote.PrettyTransitTime }} ({{ selected_quote.quote.TransitTime }})
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipper Address -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="shipper-section">
+                    <h4 class="standard-heading mb-3">1. Shipper Address</h4>
+                    <form>
+                        {% for field,label in [
+                            ('SenderContactName','Full Name'),
+                            ('SenderEmail','Email Address'),
+                            ('SenderPhoneNumber','Contact Number'),
+                            ('SenderZipcode','Postal Code'),
+                            ('SenderAddress1','Address Line 1'),
+                            ('SenderAddress2','Address Line 2 (Optional)'),
+                            ('SenderAddress3','Address Line 3 (Optional)'),
+                            ('SenderCity','City'),
+                            ('SenderCountryCode','CountryCode')
+                        ] %}
+                            <div class="form-group mb-4">
+                                <div class="form-floating">
+                                    {% if field == 'SenderCountryCode' %}
+                                        {% set countries = {
+                                            'GB': 'United Kingdom', 'AF': 'Afghanistan', 'AL': 'Albania', 'DZ': 'Algeria',
+                                            'AS': 'American Samoa', 'AD': 'Andorra', 'AO': 'Angola', 'AI': 'Anguilla',
+                                            'AG': 'Antigua', 'AR': 'Argentina', 'AM': 'Armenia', 'AW': 'Aruba',
+                                            'AU': 'Australia', 'AT': 'Austria', 'AZ': 'Azerbaijan', 'BS': 'Bahamas',
+                                            'BH': 'Bahrain', 'BD': 'Bangladesh', 'BB': 'Barbados', 'BE': 'Belgium',
+                                            'BZ': 'Belize', 'BJ': 'Benin', 'BM': 'Bermuda', 'BT': 'Bhutan',
+                                            'BO': 'Bolivia', 'BA': 'Bosnia Herzegovina', 'BW': 'Botswana', 'BR': 'Brazil',
+                                            'BN': 'Brunei', 'BG': 'Bulgaria', 'BF': 'Burkina Faso', 'BI': 'Burundi',
+                                            'KH': 'Cambodia', 'CM': 'Cameroon', 'CA': 'Canada', 'CL': 'Chile',
+                                            'CN': 'China', 'CO': 'Colombia', 'CR': 'Costa Rica', 'HR': 'Croatia',
+                                            'CU': 'Cuba', 'CY': 'Cyprus', 'CZ': 'Czech Republic', 'DK': 'Denmark',
+                                            'DO': 'Dominican Republic', 'EC': 'Ecuador', 'EG': 'Egypt', 'SV': 'El Salvador',
+                                            'EE': 'Estonia', 'ET': 'Ethiopia', 'FJ': 'Fiji', 'FI': 'Finland',
+                                            'FR': 'France', 'DE': 'Germany', 'GH': 'Ghana', 'GR': 'Greece',
+                                            'GL': 'Greenland', 'GT': 'Guatemala', 'GY': 'Guyana', 'HT': 'Haiti',
+                                            'HN': 'Honduras', 'HK': 'Hong Kong', 'HU': 'Hungary', 'IS': 'Iceland',
+                                            'IN': 'India', 'ID': 'Indonesia', 'IR': 'Iran', 'IQ': 'Iraq',
+                                            'IE': 'Ireland', 'IL': 'Israel', 'IT': 'Italy', 'JM': 'Jamaica',
+                                            'JP': 'Japan', 'JO': 'Jordan', 'KZ': 'Kazakhstan', 'KE': 'Kenya',
+                                            'KW': 'Kuwait', 'LV': 'Latvia', 'LB': 'Lebanon', 'LR': 'Liberia',
+                                            'LY': 'Libya', 'LT': 'Lithuania', 'LU': 'Luxembourg', 'MY': 'Malaysia',
+                                            'MV': 'Maldives', 'ML': 'Mali', 'MT': 'Malta', 'MU': 'Mauritius',
+                                            'MX': 'Mexico', 'MD': 'Moldova', 'MC': 'Monaco', 'MN': 'Mongolia',
+                                            'ME': 'Montenegro', 'MA': 'Morocco', 'MZ': 'Mozambique', 'MM': 'Myanmar',
+                                            'NA': 'Namibia', 'NP': 'Nepal', 'NL': 'Netherlands', 'NZ': 'New Zealand',
+                                            'NI': 'Nicaragua', 'NE': 'Niger', 'NG': 'Nigeria', 'NO': 'Norway',
+                                            'OM': 'Oman', 'PK': 'Pakistan', 'PA': 'Panama', 'PY': 'Paraguay',
+                                            'PE': 'Peru', 'PH': 'Philippines', 'PL': 'Poland', 'PT': 'Portugal',
+                                            'QA': 'Qatar', 'RO': 'Romania', 'RU': 'Russia', 'RW': 'Rwanda',
+                                            'SA': 'Saudi Arabia', 'SN': 'Senegal', 'RS': 'Serbia', 'SC': 'Seychelles',
+                                            'SG': 'Singapore', 'SK': 'Slovakia', 'SI': 'Slovenia', 'ZA': 'South Africa',
+                                            'ES': 'Spain', 'LK': 'Sri Lanka', 'SD': 'Sudan', 'SR': 'Suriname',
+                                            'SE': 'Sweden', 'CH': 'Switzerland', 'SY': 'Syria', 'TW': 'Taiwan',
+                                            'TZ': 'Tanzania', 'TH': 'Thailand', 'TG': 'Togo', 'TT': 'Trinidad & Tobago',
+                                            'TN': 'Tunisia', 'TR': 'Turkey', 'UG': 'Uganda', 'UA': 'Ukraine',
+                                            'AE': 'United Arab Emirates', 'US': 'USA', 'UY': 'Uruguay', 'UZ': 'Uzbekistan',
+                                            'VE': 'Venezuela', 'VN': 'Vietnam', 'ZM': 'Zambia', 'ZW': 'Zimbabwe'
+                                        } %}
+                                        <select name="{{ field }}" class="form-select js-custom-form-el">
+                                            {% for code, name in countries.items() %}
+                                                <option value="{{ code }}">{{ name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        <input name="{{ field }}" placeholder="{{ field }}" type="text" class="form-control">
+                                    {% endif %}
+                                    <label>{{ label }}</label>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="col-md-6">
+                <div class="delivery-section">
+                    <h4 class="standard-heading mb-3">2. Delivery Address</h4>
+                    <form>
+                        {% for field,label in [
+                            ('ReceiverContactName','Full Name'),
+                            ('ReceiverEmail','Email Address'),
+                            ('ReceiverPhoneNumber','Contact Number'),
+                            ('ReceiverZipcode','Postal Code'),
+                            ('ReceiverAddress1','Address Line 1'),
+                            ('ReceiverAddress2','Address Line 2 (Optional)'),
+                            ('ReceiverAddress3','Address Line 3 (Optional)'),
+                            ('ReceiverCity','City'),
+                            ('ReceiverCountryCode','CountryCode')
+                        ] %}
+                            <div class="form-group mb-4">
+                                <div class="form-floating">
+                                    {% if field == 'ReceiverCountryCode' %}
+                                        {% set countries = {
+                                            'GB': 'United Kingdom', 'AF': 'Afghanistan', 'AL': 'Albania', 'DZ': 'Algeria',
+                                            'AS': 'American Samoa', 'AD': 'Andorra', 'AO': 'Angola', 'AI': 'Anguilla',
+                                            'AG': 'Antigua', 'AR': 'Argentina', 'AM': 'Armenia', 'AW': 'Aruba',
+                                            'AU': 'Australia', 'AT': 'Austria', 'AZ': 'Azerbaijan', 'BS': 'Bahamas',
+                                            'BH': 'Bahrain', 'BD': 'Bangladesh', 'BB': 'Barbados', 'BE': 'Belgium',
+                                            'BZ': 'Belize', 'BJ': 'Benin', 'BM': 'Bermuda', 'BT': 'Bhutan',
+                                            'BO': 'Bolivia', 'BA': 'Bosnia Herzegovina', 'BW': 'Botswana', 'BR': 'Brazil',
+                                            'BN': 'Brunei', 'BG': 'Bulgaria', 'BF': 'Burkina Faso', 'BI': 'Burundi',
+                                            'KH': 'Cambodia', 'CM': 'Cameroon', 'CA': 'Canada', 'CL': 'Chile',
+                                            'CN': 'China', 'CO': 'Colombia', 'CR': 'Costa Rica', 'HR': 'Croatia',
+                                            'CU': 'Cuba', 'CY': 'Cyprus', 'CZ': 'Czech Republic', 'DK': 'Denmark',
+                                            'DO': 'Dominican Republic', 'EC': 'Ecuador', 'EG': 'Egypt', 'SV': 'El Salvador',
+                                            'EE': 'Estonia', 'ET': 'Ethiopia', 'FJ': 'Fiji', 'FI': 'Finland',
+                                            'FR': 'France', 'DE': 'Germany', 'GH': 'Ghana', 'GR': 'Greece',
+                                            'GL': 'Greenland', 'GT': 'Guatemala', 'GY': 'Guyana', 'HT': 'Haiti',
+                                            'HN': 'Honduras', 'HK': 'Hong Kong', 'HU': 'Hungary', 'IS': 'Iceland',
+                                            'IN': 'India', 'ID': 'Indonesia', 'IR': 'Iran', 'IQ': 'Iraq',
+                                            'IE': 'Ireland', 'IL': 'Israel', 'IT': 'Italy', 'JM': 'Jamaica',
+                                            'JP': 'Japan', 'JO': 'Jordan', 'KZ': 'Kazakhstan', 'KE': 'Kenya',
+                                            'KW': 'Kuwait', 'LV': 'Latvia', 'LB': 'Lebanon', 'LR': 'Liberia',
+                                            'LY': 'Libya', 'LT': 'Lithuania', 'LU': 'Luxembourg', 'MY': 'Malaysia',
+                                            'MV': 'Maldives', 'ML': 'Mali', 'MT': 'Malta', 'MU': 'Mauritius',
+                                            'MX': 'Mexico', 'MD': 'Moldova', 'MC': 'Monaco', 'MN': 'Mongolia',
+                                            'ME': 'Montenegro', 'MA': 'Morocco', 'MZ': 'Mozambique', 'MM': 'Myanmar',
+                                            'NA': 'Namibia', 'NP': 'Nepal', 'NL': 'Netherlands', 'NZ': 'New Zealand',
+                                            'NI': 'Nicaragua', 'NE': 'Niger', 'NG': 'Nigeria', 'NO': 'Norway',
+                                            'OM': 'Oman', 'PK': 'Pakistan', 'PA': 'Panama', 'PY': 'Paraguay',
+                                            'PE': 'Peru', 'PH': 'Philippines', 'PL': 'Poland', 'PT': 'Portugal',
+                                            'QA': 'Qatar', 'RO': 'Romania', 'RU': 'Russia', 'RW': 'Rwanda',
+                                            'SA': 'Saudi Arabia', 'SN': 'Senegal', 'RS': 'Serbia', 'SC': 'Seychelles',
+                                            'SG': 'Singapore', 'SK': 'Slovakia', 'SI': 'Slovenia', 'ZA': 'South Africa',
+                                            'ES': 'Spain', 'LK': 'Sri Lanka', 'SD': 'Sudan', 'SR': 'Suriname',
+                                            'SE': 'Sweden', 'CH': 'Switzerland', 'SY': 'Syria', 'TW': 'Taiwan',
+                                            'TZ': 'Tanzania', 'TH': 'Thailand', 'TG': 'Togo', 'TT': 'Trinidad & Tobago',
+                                            'TN': 'Tunisia', 'TR': 'Turkey', 'UG': 'Uganda', 'UA': 'Ukraine',
+                                            'AE': 'United Arab Emirates', 'US': 'USA', 'UY': 'Uruguay', 'UZ': 'Uzbekistan',
+                                            'VE': 'Venezuela', 'VN': 'Vietnam', 'ZM': 'Zambia', 'ZW': 'Zimbabwe'
+                                        } %}
+                                        <select name="{{ field }}" class="form-select js-custom-form-el">
+                                            {% for code, name in countries.items() %}
+                                                <option value="{{ code }}">{{ name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        <input name="{{ field }}" placeholder="{{ field }}" type="text" class="form-control">
+                                    {% endif %}
+                                    <label>{{ label }}</label>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="additional-information">
+                        <h4 class="standard-heading mb-3">3. Additional Information</h4>
+                            {% for field, label in [
+                                ('PackageContents', 'Contents'),
+                                ('PackageValue', 'Value of contents'),
+                                ('CourierNotes', 'Courier Notes')
+                            ] %}
+                                <div class="form-group mb-4">
+                                    <div class="form-floating">
+                                        <input name="{{ field }}" placeholder="{{ field }}" type="text" class="form-control">
+                                        <label>{{ label }}</label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="additional-information">
+                        {# Custom Export Reasons (pre-defined list) #}
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <select name="CustomsExportReason" class="form-select js-custom-form-el">
+                                    {% for option in [
+                                        'Sold', 'Gift', 'Sample', 'Repair', 'Documents',
+                                        'Intra Company Transfer', 'Temporary Export', 'Return', 'Personal Effects'
+                                    ] %}
+                                        <option value="{{ option }}">{{ option }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label>Customs Export Reason</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="additional-information">
+                        {# Country of Manufacture (large country list) #}
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <select name="CustomsCountryOfManufacture" class="form-select js-custom-form-el">
+                                    {% set countries = {
+                                        'GB': 'United Kingdom', 'AF': 'Afghanistan', 'AL': 'Albania', 'DZ': 'Algeria',
+                                        'AS': 'American Samoa', 'AD': 'Andorra', 'AO': 'Angola', 'AI': 'Anguilla',
+                                        'AG': 'Antigua', 'AR': 'Argentina', 'AM': 'Armenia', 'AW': 'Aruba',
+                                        'AU': 'Australia', 'AT': 'Austria', 'AZ': 'Azerbaijan', 'BS': 'Bahamas',
+                                        'BH': 'Bahrain', 'BD': 'Bangladesh', 'BB': 'Barbados', 'BE': 'Belgium',
+                                        'BZ': 'Belize', 'BJ': 'Benin', 'BM': 'Bermuda', 'BT': 'Bhutan',
+                                        'BO': 'Bolivia', 'BA': 'Bosnia Herzegovina', 'BW': 'Botswana', 'BR': 'Brazil',
+                                        'BN': 'Brunei', 'BG': 'Bulgaria', 'BF': 'Burkina Faso', 'BI': 'Burundi',
+                                        'KH': 'Cambodia', 'CM': 'Cameroon', 'CA': 'Canada', 'CL': 'Chile',
+                                        'CN': 'China', 'CO': 'Colombia', 'CR': 'Costa Rica', 'HR': 'Croatia',
+                                        'CU': 'Cuba', 'CY': 'Cyprus', 'CZ': 'Czech Republic', 'DK': 'Denmark',
+                                        'DO': 'Dominican Republic', 'EC': 'Ecuador', 'EG': 'Egypt', 'SV': 'El Salvador',
+                                        'EE': 'Estonia', 'ET': 'Ethiopia', 'FJ': 'Fiji', 'FI': 'Finland',
+                                        'FR': 'France', 'DE': 'Germany', 'GH': 'Ghana', 'GR': 'Greece',
+                                        'GL': 'Greenland', 'GT': 'Guatemala', 'GY': 'Guyana', 'HT': 'Haiti',
+                                        'HN': 'Honduras', 'HK': 'Hong Kong', 'HU': 'Hungary', 'IS': 'Iceland',
+                                        'IN': 'India', 'ID': 'Indonesia', 'IR': 'Iran', 'IQ': 'Iraq',
+                                        'IE': 'Ireland', 'IL': 'Israel', 'IT': 'Italy', 'JM': 'Jamaica',
+                                        'JP': 'Japan', 'JO': 'Jordan', 'KZ': 'Kazakhstan', 'KE': 'Kenya',
+                                        'KW': 'Kuwait', 'LV': 'Latvia', 'LB': 'Lebanon', 'LR': 'Liberia',
+                                        'LY': 'Libya', 'LT': 'Lithuania', 'LU': 'Luxembourg', 'MY': 'Malaysia',
+                                        'MV': 'Maldives', 'ML': 'Mali', 'MT': 'Malta', 'MU': 'Mauritius',
+                                        'MX': 'Mexico', 'MD': 'Moldova', 'MC': 'Monaco', 'MN': 'Mongolia',
+                                        'ME': 'Montenegro', 'MA': 'Morocco', 'MZ': 'Mozambique', 'MM': 'Myanmar',
+                                        'NA': 'Namibia', 'NP': 'Nepal', 'NL': 'Netherlands', 'NZ': 'New Zealand',
+                                        'NI': 'Nicaragua', 'NE': 'Niger', 'NG': 'Nigeria', 'NO': 'Norway',
+                                        'OM': 'Oman', 'PK': 'Pakistan', 'PA': 'Panama', 'PY': 'Paraguay',
+                                        'PE': 'Peru', 'PH': 'Philippines', 'PL': 'Poland', 'PT': 'Portugal',
+                                        'QA': 'Qatar', 'RO': 'Romania', 'RU': 'Russia', 'RW': 'Rwanda',
+                                        'SA': 'Saudi Arabia', 'SN': 'Senegal', 'RS': 'Serbia', 'SC': 'Seychelles',
+                                        'SG': 'Singapore', 'SK': 'Slovakia', 'SI': 'Slovenia', 'ZA': 'South Africa',
+                                        'ES': 'Spain', 'LK': 'Sri Lanka', 'SD': 'Sudan', 'SR': 'Suriname',
+                                        'SE': 'Sweden', 'CH': 'Switzerland', 'SY': 'Syria', 'TW': 'Taiwan',
+                                        'TZ': 'Tanzania', 'TH': 'Thailand', 'TG': 'Togo', 'TT': 'Trinidad & Tobago',
+                                        'TN': 'Tunisia', 'TR': 'Turkey', 'UG': 'Uganda', 'UA': 'Ukraine',
+                                        'AE': 'United Arab Emirates', 'US': 'USA', 'UY': 'Uruguay', 'UZ': 'Uzbekistan',
+                                        'VE': 'Venezuela', 'VN': 'Vietnam', 'ZM': 'Zambia', 'ZW': 'Zimbabwe'
+                                    } %}
+                                    {% for code, name in countries.items() %}
+                                        <option value="{{ code }}">{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label>Country of Manufacture</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                {# New item line table #}
+                <div class="col-md-12">
+                    <div class="additional-information">
+                        <h4 class="standard-heading mb-3">4. Breakdown of contents</h4>
+                        <p class="mb-3" style="color:red;"><strong>IMPORTANT:</strong> If you do not specify a <u>full itemised breakdown</u> of your parcel(s) contents, it's likely to get held by customs or returned to you at additional cost.  Please provide an 
+          accurate breakdown by adding each item separately then clicking 'Add another item line'.
+        </p>
+                        <div id="item-lines">
+                            <div class="row mb-3 item-line">
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="text" name="Description[]" class="form-control" placeholder="Description">
+                                        <label>Description (Letters and numbers only)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-floating">
+                                        <input type="number" name="Quantity[]" class="form-control qty-input" placeholder="Quantity" min="1" value="1">
+                                        <label>Quantity</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-floating">
+                                        <input type="number" name="ItemValue[]" class="form-control value-input" placeholder="Item Value" step="0.01" value="0">
+                                        <label>Item Value</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-floating">
+                                        <input type="text" name="LineSubtotal[]" class="form-control subtotal" placeholder="Line Subtotal" readonly>
+                                        <label>Line Subtotal</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-center">
+                                    <button type="button" class="btn btn-outline-danger w-100 remove-line">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <button type="button" id="add-line" class="btn btn-outline-primary mt-2">
+                            + Add another item line
+                        </button>
+                        
+                        {# Grand Total #}
+                        <div class="row">
+                            <div class="col-md-12 items-grand-total text-end mb-4">
+                                <h4>Grand Total: <span id="grand-total">0.00</span></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                {# New item line table #}
+                <div class="col-md-12">
+                    <div class="terms-conditions">
+                        <h4 class="standard-heading mb-3">5. Terms & Conditions</h4>
+                        <label class="text" for="tncs_all_details" style="padding-left: 30px;">
+                            • I agree to the <a href="#" target="_blank">terms and conditions</a> and <a href="#" target="_blank">privacy policy</a> and confirm that my shipment complies with the <a href="#" class="js-new-window" data-width="465" data-height="550">restricted items list</a>.
+                        </label>
+                        <label class="text" for="tncs_all_details" style="padding-left: 30px;">
+                            • I agree that if the dimensions and weight of my parcel(s) are incorrect, additional charges will be applied to my card based on information provided by the courier.
+                        </label>
+                        <label class="text" for="tncs_all_details" style="padding-left: 30px;">
+                            • I confirm that the value of goods that I have declared is correct.
+                        </label>
+                        <label class="text" for="tncs_all_details" style="padding-left: 30px;">
+                            • Important: This service is for a maximum volumetric/nominal weight of 30kg per item. I understand that if the carrier finds my item to be in excess of this limit a minimum charge of £43.84 + VAT will be applied to my card.
+                        </label>
+                        <label class="text" for="tncs_all_details" style="padding-left: 30px;">
+                            • I confirm I've read and agree to the specific terms of Parcelforce which can be found in the following 2 links. <a href="#" target="_blank">Compensation Exclusions</a> and <a href="#" target="_blank">Prohibitions and Restrictions Guide</a>.
+                        </label>
+                        <div class="text-center mt-4">
+                            <button id="generatePayloadBtn" class="btn btn-lg btn-red">Add to Basket</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </form>
+    </div>
+</section>
+
+<!-- Generate Button -->
+<div class="text-center my-4">
+</div>
+
+<!-- Output JSON -->
+<pre id="quoteResponse" style="background:#f5f5f5; padding:10px; border-radius:5px; max-height:400px; overflow:auto;"></pre>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('item-lines');
+    const addLineBtn = document.getElementById('add-line');
+    const grandTotalEl = document.getElementById('grand-total');
+
+    // Function to calculate subtotal of a row
+    function updateSubtotal(row) {
+        const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+        const value = parseFloat(row.querySelector('.value-input').value) || 0;
+        const subtotal = qty * value;
+        row.querySelector('.subtotal').value = subtotal.toFixed(2);
+        updateGrandTotal();
+    }
+
+    // Function to calculate grand total
+    function updateGrandTotal() {
+        let total = 0;
+        container.querySelectorAll('.subtotal').forEach(input => {
+            total += parseFloat(input.value) || 0;
+        });
+        grandTotalEl.textContent = total.toFixed(2);
+    }
+
+    // Update Remove button visibility
+    function updateRemoveButtons() {
+        const rows = container.querySelectorAll('.item-line');
+        rows.forEach((row, index) => {
+            const removeBtn = row.querySelector('.remove-line');
+            if (rows.length === 1) {
+                removeBtn.style.display = 'none'; // hide remove if only 1 row
+            } else {
+                removeBtn.style.display = 'block'; // show remove if more than 1
+            }
+        });
+    }
+
+    // Recalculate subtotal when quantity or value changes
+    container.addEventListener('input', function(e) {
+        if (e.target.classList.contains('qty-input') || e.target.classList.contains('value-input')) {
+            const row = e.target.closest('.item-line');
+            updateSubtotal(row);
+        }
+    });
+
+    // Add new item line
+    addLineBtn.addEventListener('click', function() {
+        const firstRow = container.querySelector('.item-line');
+        const clone = firstRow.cloneNode(true);
+
+        clone.querySelectorAll('input').forEach(input => {
+            input.value = '';
+            if (input.classList.contains('qty-input')) input.value = 1;
+            if (input.classList.contains('value-input')) input.value = 0;
+            if (input.classList.contains('subtotal')) input.value = '';
+        });
+
+        container.appendChild(clone);
+        updateRemoveButtons();
+    });
+
+    // Remove item line
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-line')) {
+            const row = e.target.closest('.item-line');
+            row.remove();
+            updateGrandTotal();
+            updateRemoveButtons();
+        }
+    });
+
+    // Initialize remove button visibility on page load
+    updateRemoveButtons();
+});
+
+</script>
+<script>
+const selected_quote = {{ selected_quote | tojson }};
+
+// Helper: Basic form validation
+function validateFormData(data, requiredFields) {
+    let missing = [];
+    requiredFields.forEach(field => {
+        if (!data[field] || data[field].trim() === "") {
+            missing.push(field);
+        }
+    });
+    return missing;
+}
+
+// Helper: Get form data and optionally trim prefixes
+function getFormData(formSelector, prefixToRemove) {
+    const form = document.querySelector(formSelector);
+    const inputs = form.querySelectorAll("input");
+    const data = {};
+    inputs.forEach(input => {
+        let key = input.name.trim();
+        if (prefixToRemove && key.startsWith(prefixToRemove)) {
+            key = key.replace(prefixToRemove, ""); // Remove prefix
+        }
+        data[key] = input.value.trim() || "";
+    });
+    return data;
+}
+
+document.getElementById("generatePayloadBtn").addEventListener("click", () => {
+    const csrfToken = "{{ csrf_token }}";
+    const serverDateGMT = "{{ server_date_gmt }}";
+
+    // Utility to get all form data from a container
+    function getAllFormData(containerSelector, prefixToRemove = "") {
+        const container = document.querySelector(containerSelector);
+        const data = {};
+        container.querySelectorAll("input, select, textarea").forEach(el => {
+            let key = el.name.trim();
+            if (prefixToRemove && key.startsWith(prefixToRemove)) {
+                key = key.replace(prefixToRemove, "");
+            }
+            data[key] = el.value.trim();
+        });
+        return data;
+    }
+
+    // Shipper & Delivery
+    const shipperData = getAllFormData(".shipper-section form", "Sender");
+    const deliveryData = getAllFormData(".delivery-section form", "Receiver");
+
+    // Additional Info
+    const additionalData = getAllFormData(".additional-information");
+
+    // Item Lines
+    const itemLines = [];
+    document.querySelectorAll("#item-lines .item-line").forEach(row => {
+        const desc = row.querySelector('[name="Description[]"]').value.trim();
+        const qty = parseFloat(row.querySelector('[name="Quantity[]"]').value) || 0;
+        const value = parseFloat(row.querySelector('[name="ItemValue[]"]').value) || 0;
+        itemLines.push({
+            Description: desc,
+            Quantity: qty,
+            ItemValue: value,
+            LineSubtotal: qty * value
+        });
+    });
+
+    // Validation: basic required fields
+    const missingShipper = Object.entries(shipperData).filter(([k,v]) => !v && !k.includes("Address2") && !k.includes("Address3")).map(([k])=>k);
+    const missingDelivery = Object.entries(deliveryData).filter(([k,v]) => !v && !k.includes("Address2") && !k.includes("Address3")).map(([k])=>k);
+    if (missingShipper.length || missingDelivery.length) {
+        alert("Please fill in all required fields:\n" +
+              (missingShipper.length ? `Shipper: ${missingShipper.join(", ")}\n` : "") +
+              (missingDelivery.length ? `Delivery: ${missingDelivery.join(", ")}` : ""));
+        return;
+    }
+
+    // Compose payload
+    const payload = {
+        Pieces: itemLines,
+        Collection: shipperData,
+        Shipper: shipperData,
+        Consignee: deliveryData,
+        Importer: deliveryData,
+        ReadyByDate: serverDateGMT,
+        Service: {
+            Code: selected_quote.quote.ServiceCode || "UPSE",
+            Enhancements: selected_quote.quote.Costs?.map(c => ({ Code: c.Reference })) || []
+        }
+    };
+
+    fetch("/api/method/click2ship_core.api.call.session_save", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Frappe-CSRF-Token": csrfToken
+        },
+        body: JSON.stringify({ booking: JSON.stringify(payload) }),
+        credentials: "include"
+    })
+    .then(res => res.json())
+    .then(r => {
+        if (r.message && r.message.status === "success") {
+            //if (r.message.logged_in) window.location.href = "/cart";
+            //else window.location.href = "/identity";
+            window.location.href = "/cart";
+        } else {
+            alert("Failed to store booking cache");
+        }
+    })
+    .catch(err => {
+        console.error("Error storing booking cache:", err);
+        alert("An error occurred while storing booking cache");
+    });
+});
+</script>
+{% endblock %}

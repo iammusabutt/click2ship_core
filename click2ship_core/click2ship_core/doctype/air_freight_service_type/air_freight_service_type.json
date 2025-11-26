@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:air_freight_service_type",
+ "creation": "2025-09-15 22:51:33.808823",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "air_freight_service_type",
+  "service_code"
+ ],
+ "fields": [
+  {
+   "fieldname": "air_freight_service_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Service Type",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "service_code",
+   "fieldtype": "Data",
+   "label": "Service Code"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-15 23:55:28.460045",
+ "modified_by": "Administrator",
+ "module": "Click2Ship Core",
+ "name": "Air Freight Service Type",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,50 @@
+{% extends "click2ship_core/templates/layout.html" %}
+
+{% block content %}
+  <div class="bg-white p-8 rounded-2xl shadow-md w-96">
+    <h2 class="text-2xl font-semibold text-center mb-6">Sign In</h2>
+
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="block text-gray-700">Email</label>
+        <input type="text" id="usr" name="usr" class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-200" required>
+      </div>
+      <div>
+        <label class="block text-gray-700">Password</label>
+        <input type="password" id="pwd" name="pwd" class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-200" required>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Login</button>
+    </form>
+
+    <p id="errorMsg" class="text-red-500 text-sm mt-4 hidden"></p>
+  </div>
+
+  <script>
+    $("#loginForm").on("submit", function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: "POST",
+        url: "/api/method/login",
+        data: {
+          usr: $("#usr").val(),
+          pwd: $("#pwd").val()
+        },
+        success: function(r) {
+          if (r.message === "Logged In") {
+            window.location.href = "/app";  // redirect after login
+          }
+        },
+        error: function(xhr) {
+          let msg = "Invalid login. Try again.";
+          if (xhr.responseJSON && xhr.responseJSON._server_messages) {
+            msg = JSON.parse(JSON.parse(xhr.responseJSON._server_messages)[0]).message;
+          }
+          $("#errorMsg").text(msg).removeClass("hidden");
+        }
+      });
+    });
+  </script>
+
+{% endblock %}

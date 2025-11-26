@@ -8,6 +8,10 @@ app_license = "mit"
 # Apps
 # ------------------
 
+#csrf_exempted_methods = [
+#    "click2ship_core.api.permission.has_app_permission",
+#]
+
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page
@@ -27,10 +31,12 @@ app_license = "mit"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/click2ship_core/css/click2ship_core.css"
 # app_include_js = "/assets/click2ship_core/js/click2ship_core.js"
+app_include_js = "/assets/click2ship_core/js/quotes.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/click2ship_core/css/click2ship_core.css"
 # web_include_js = "/assets/click2ship_core/js/click2ship_core.js"
+web_include_js = "/assets/click2ship_core/js/quotes.js"
 
 # include custom scss in every website theme (without file extension ".scss")
 # website_theme_scss = "click2ship_core/public/scss/website"

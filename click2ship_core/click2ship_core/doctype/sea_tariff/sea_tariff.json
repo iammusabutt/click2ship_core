@@ -1,0 +1,133 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{origin_country} to {destination_country} by {shipline}",
+ "creation": "2025-09-22 23:05:09.253142",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_origin_destination",
+  "origin_country",
+  "origin_seaport_code",
+  "origin_seaport_name",
+  "column_break_jprq",
+  "destination_country",
+  "destination_seaport_code",
+  "distination_seaport_name",
+  "additional_details_section",
+  "shipline",
+  "column_break_xgph",
+  "section_break_iddk",
+  "sea_tariff_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_origin_destination",
+   "fieldtype": "Section Break",
+   "label": "Origin and Destination"
+  },
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Origin Country",
+   "options": "Country",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_jprq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "origin_seaport_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Origin Seaport Code",
+   "options": "Seaport",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "origin_seaport_code.seaport_name",
+   "fieldname": "origin_seaport_name",
+   "fieldtype": "Data",
+   "label": "Origin Seaport Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Link",
+   "label": "Destination Country",
+   "options": "Country",
+   "reqd": 1
+  },
+  {
+   "fieldname": "destination_seaport_code",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Destination Seaport Code",
+   "options": "Seaport",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "origin_seaport_code.seaport_name",
+   "fieldname": "distination_seaport_name",
+   "fieldtype": "Data",
+   "label": "Distination Seaport Name"
+  },
+  {
+   "fieldname": "additional_details_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Details"
+  },
+  {
+   "fieldname": "shipline",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Shipline",
+   "options": "Shipping Line",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_xgph",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_iddk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sea_tariff_rate",
+   "fieldtype": "Table",
+   "label": "Sea Tariff Rate",
+   "options": "Sea Tariff Rate",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-23 00:33:46.224783",
+ "modified_by": "Administrator",
+ "module": "Click2Ship Core",
+ "name": "Sea Tariff",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

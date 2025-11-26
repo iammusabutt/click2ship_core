@@ -1,0 +1,65 @@
+{% extends "click2ship_core/templates/layout.html" %}
+
+{% block content %}
+<section id="cover">
+    <div class="container">
+        <div class="quote-header"><h2>My Bookings</h2></div>
+    </div>
+    <div class="container">
+
+        <!-- Shipper Address -->
+        <div class="row">
+
+            <!-- Delivery Address -->
+            <div class="col-md-3">
+                <div class="payment-options-section left-navaigation-section">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item ">
+                            <a href="shipments" class="nav-link "><i class="mdi mdi-truck-fast"></i> Shipments</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="trackings"><i class="mdi mdi-map-marker"></i> Trackings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="orders"><i class="mdi mdi-package-variant"></i> Orders</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-9">
+                {% if bookings %}
+                    {% for b in bookings %}
+                    <div class="shipper-section">
+                        <!-- Quote Summary -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="quote-wrapper">
+                                    <div class="quote-item">
+                                        <div class="flex-200">
+                                            <div class="quote-item-title">Barcode</div>
+                                            <div class="quote-item-desc">{{ b.shipment_barcode }}</div>
+                                        </div>
+                                        <div class="flex-100">
+                                            <div class="quote-item-title">Created On</div>
+                                            <div class="quote-item-desc">{{ b.creation }}</div>
+                                        </div>
+                                        <div class="flex-150">
+                                            <div class="nav-item nav-btn -outlined">
+                                                <a class="nav-btn-link book-now-btn" href="{{ b.file_url }}" target="_blank">Download</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No shipments found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,98 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-04 16:39:39.825106",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "via_costing_uk_section",
+  "air_freight_cost_via_uk",
+  "local_processing_cost_via_uk",
+  "local_custom_charges_via_uk",
+  "transshipping_clearance_via_uk",
+  "via_costing_uae_section",
+  "air_freight_cost_via_uae",
+  "local_processing_cost_via_uae",
+  "local_custom_charges_via_uae",
+  "transshipping_clearance_via_uae"
+ ],
+ "fields": [
+  {
+   "fieldname": "via_costing_uk_section",
+   "fieldtype": "Section Break",
+   "label": "Via Costing (UK)"
+  },
+  {
+   "description": "(Per Kg)",
+   "fieldname": "air_freight_cost_via_uk",
+   "fieldtype": "Data",
+   "label": "Air Freight Cost"
+  },
+  {
+   "fieldname": "local_processing_cost_via_uk",
+   "fieldtype": "Data",
+   "label": "Local Processing Cost"
+  },
+  {
+   "fieldname": "local_custom_charges_via_uk",
+   "fieldtype": "Data",
+   "label": "Local Custom Charges"
+  },
+  {
+   "description": "(Per Kg)",
+   "fieldname": "transshipping_clearance_via_uk",
+   "fieldtype": "Data",
+   "label": "Destination Transhipping Clearance"
+  },
+  {
+   "fieldname": "via_costing_uae_section",
+   "fieldtype": "Section Break",
+   "label": "Via Costing UAE"
+  },
+  {
+   "description": "(Per Kg)",
+   "fieldname": "air_freight_cost_via_uae",
+   "fieldtype": "Data",
+   "label": "Air Freight Cost"
+  },
+  {
+   "fieldname": "local_processing_cost_via_uae",
+   "fieldtype": "Data",
+   "label": "Local Processing Cost"
+  },
+  {
+   "fieldname": "local_custom_charges_via_uae",
+   "fieldtype": "Data",
+   "label": "Local Custom Charges"
+  },
+  {
+   "description": "(Per Kg)",
+   "fieldname": "transshipping_clearance_via_uae",
+   "fieldtype": "Data",
+   "label": "Destination Transhipping Clearance"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-11-04 16:47:08.810353",
+ "modified_by": "Administrator",
+ "module": "Click2Ship Core",
+ "name": "First Mile Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-30 02:48:47.082346",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_barcode",
+  "weight",
+  "item_label"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_barcode",
+   "fieldtype": "Data",
+   "label": "Item Barcode"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Float",
+   "label": "Weight"
+  },
+  {
+   "fieldname": "item_label",
+   "fieldtype": "Long Text",
+   "label": "Item Label"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-30 02:50:15.172844",
+ "modified_by": "Administrator",
+ "module": "Click2Ship Core",
+ "name": "Shipment Booking Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

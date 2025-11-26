@@ -1,0 +1,417 @@
+{% extends "click2ship_core/templates/layout.html" %}
+
+{% block content %}
+<h2>ERPNext Token Auth API Test</h2>
+
+<button id="get-user-btn">Get ERPNext User (via token)</button>
+
+<pre id="api-response">Waiting for response...</pre>
+
+<script>
+  document.getElementById("get-user-btn").addEventListener("click", async () => {
+    try {
+      const res = await fetch(
+        "/api/method/click2ship_core.api.air_freight.get_quotes",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({})  // You can send payload here if needed
+        }
+      );
+
+      const result = await res.json();
+
+      document.getElementById("api-response").textContent = JSON.stringify(
+        result.message,
+        null,
+        2
+      );
+    } catch (err) {
+      document.getElementById("api-response").textContent = "Error: " + err.message;
+    }
+  });
+</script>
+<div>
+  <button id="get-rates-btn" class="btn btn-primary">Get Rates</button>
+  <pre id="rates-result" style="background:#f5f5f5; padding:10px; margin-top:10px;"></pre>
+</div>
+
+<script>
+  document.getElementById("get-rates-btn").addEventListener("click", async () => {
+    const payload = {
+    	"DepartureCountryCode": "GB",
+    	"DeparturePostcode": "TW4 6DE",
+    	"DepartureLocation": "London",
+    	"ArrivalCountryCode": "AU",
+    	"ArrivalPostcode": "4825",
+    	"ArrivalLocation": "MOUNT ISA",
+    	"PaymentCurrencyCode": "GBP",
+    	"WeightMeasure": "KG",
+    	"Weight": 3.5,
+    	"NumofItem": "1",
+    	"ServiceType": "EN",
+    	"DimensionUnit": "CM",
+    	"CustomCurrencyCode": "GBP",
+    	"CustomAmount": 50.00,
+    	"Items": [{
+    	    "Weight": 1.25,
+    		"Length": 25,
+    		"Width": 20,
+    		"Height": 20,
+    		"CubicWeight": 2
+    	}]
+    };
+
+    try {
+      const res = await fetch(
+        "/api/method/click2ship_core.api.skynet_api.get_shipping_rates",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ data: payload })
+        }
+      );
+
+      const result = await res.json();
+      document.getElementById("rates-result").textContent = JSON.stringify(
+        result.message,
+        null,
+        2
+      );
+    } catch (err) {
+      document.getElementById("rates-result").textContent =
+        "Error: " + err.message;
+    }
+  });
+</script>
+
+
+
+
+<!-- Buttons -->
+<button id="karrio-quotes-btn">Get Quotes</button>
+<button id="karrio-carriers-btn">List Carriers</button>
+<button id="create-connection-btn">Create Carrier Connection</button>
+
+<!-- Output Display -->
+<pre id="karrio-response"></pre>
+
+<script>
+// --- Get Shipping Quotes ---
+document.getElementById("karrio-quotes-btn").addEventListener("click", () => {
+    const payload = {
+        shipper: {
+            country_code: "US",
+            postal_code: "10001",
+            city: "New York",
+            person_name: "John Doe",
+            address_line1: "123 Main St"
+        },
+        recipient: {
+            country_code: "GB",
+            postal_code: "WC2N",
+            city: "London",
+            person_name: "Jane Smith",
+            address_line1: "10 Downing St"
+        },
+        parcels: [
+            {
+                weight: 2.5,
+                weight_unit: "KG",
+                height: 10,
+                width: 15,
+                length: 20,
+                dimension_unit: "CM"
+            }
+        ]
+    };
+
+    fetch("/api/method/click2ship_core.api.karrio_api.get_rates", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("karrio-response").innerText = JSON.stringify(data, null, 2);
+    })
+    .catch(err => {
+        document.getElementById("karrio-response").innerText = "Error: " + err;
+    });
+});
+
+// --- List Carriers ---
+document.getElementById("karrio-carriers-btn").addEventListener("click", () => {
+    fetch("/api/method/click2ship_core.api.karrio_api.list_carriers", {
+        method: "GET",
+        headers: {
+            "Accept": "application/json"
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("karrio-response").innerText = JSON.stringify(data, null, 2);
+    })
+    .catch(err => {
+        document.getElementById("karrio-response").innerText = "Error: " + err;
+    });
+});
+
+document.getElementById("create-connection-btn").addEventListener("click", () => {
+    const payload = {
+        carrier_name: "ups",
+        carrier_id: "ups_connection",
+        credentials: {
+            client_id: "rAayA3fBg0AnHjFg1SkBBbGxHdYjUFHGJ32GURmmGLAWc7gG",
+            client_secret: "AenNYzwXNnovyDr5fJVpZpnMYIshRJ5CY9Lznbr7T0AOODbqypYq1mjC6kigOLSu"
+        },
+        capabilities: ["shipping"],
+        config: {},
+        metadata: {},
+        active: true
+    };
+
+    fetch("/api/method/click2ship_core.api.karrio_api.create_connection", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("karrio-response").innerText = JSON.stringify(data, null, 2);
+    })
+    .catch(err => {
+        document.getElementById("karrio-response").innerText = "Error: " + err;
+    });
+});
+</script>
+
+    <input type="text" id="origin" placeholder="Origin Airport Code">
+    <input type="text" id="destination" placeholder="Destination Airport Code">
+    <button id="search-btn">Search</button>
+
+    <pre id="result"></pre>
+
+    <script>
+      document.getElementById("search-btn").addEventListener("click", async function() {
+        let origin = document.getElementById("origin").value;
+        let destination = document.getElementById("destination").value;
+
+        let url = `/api/method/click2ship_core.api.air_freight.get_air_tariff?origin_airport_code=${origin}&destination_airport_code=${destination}`;
+
+        try {
+          let res = await fetch(url, {
+            method: "GET",
+            headers: {
+              "Accept": "application/json"
+            }
+          });
+          let data = await res.json();
+          if (data.message && data.message.length > 0) {
+            document.getElementById("result").innerHTML = JSON.stringify(data.message, null, 2);
+          } else {
+            document.getElementById("result").innerText = "No records found";
+          }
+        } catch (err) {
+          console.error(err);
+          document.getElementById("result").innerText = "Error fetching data!";
+        }
+      });
+    </script>
+<section id="cover" style="background: red;">
+        <div class="overlay"></div>
+        <div class="container  ">
+            <h1 class="text-white  fs-1 fw-bolder">ABOUT US</h1>
+            <h2 class="fw-light text-light"> Something Know  About Who We Are</h2>
+        </div>
+        </div>
+    </section>
+    <section id="cover" >
+        <div class="overlay"></div>
+        <div class="container  ">
+            <div class="row d-flex justify-content-between">
+                <div class="col-md-6">
+                    <h5 class="c2s-subtitle">Who We Are</h5>
+                    <h1 class="fs-2 fw-bolder">                 
+                    Something Know  About Who We Are
+                  </h1>
+                  <p class="fs-5 fw-light">Industrialization and growing consumerism have led to the need for developing an effective logistics system. The key to the success of any product or service lies in the ease of its availability for the user. A high-quality product or service that is not accessible when required by the potential customer is bound to fail. It is as important, if not more, to identify and develop the best logistics system, as it is to perfect the product design, manufacturing equipment and human resources. Logistics is about planning and executing how the resources are acquired, stored and then the finished product or service is transported and made available in the relevant markets and customers.</p>
+                  <br>
+            </div>
+            <div class="col-md-5 ms-auto text-center">
+              <img src="/assets/click2ship_core/logos/contact-2.jpg" alt="" class="shadow img-fluid rounded">
+            </div>   
+            </div>
+            <div class="row mt-5">
+                <div class="col-md-12">
+                     <p class="fs-5 fw-light">
+                      
+
+Pakistan with its population of 212 million is the fifth most populous country of the world. Pakistan spans over an area of 881,913 square kilometers that is approximately equal to the combined areas of France and UK. This big population spread over vast territory of Pakistan signifies the importance of an efficient logistics system to ensure availability of goods and services to all and sundry living across the country. This has made the logistics industry an important contributor to the overall economy of Pakistan. Logistics industry of Pakistan is about 23% of the service sector and provides approximately 6% of the total employment.
+                  </p>
+                  <br>
+                 
+                </div>
+                <div class="col-md-12">
+                     <p class="fs-5 fw-light">
+                      
+
+Due to the strategic location of Pakistan and transit trade, the logistics have pathway importance as well. China Pakistan Economic Corridor (CPEC) has also added to the quantum of opportunities for the logistics sector. The Industrial Parks and Special Economic Zones of CPEC would add to and further strengthen the road infra structure facilitating the flow of the trucks from and to these SEZs. The country would also have to facilitate international transport by further improving and facilitating border crossings, airports and ports. These CPEC projects have improved business opportunities for warehousing and freight forwarding companies. Efficient logistics, especially international transportation, requires modern warehousing and upgradation of the ports.
+                  </p>
+                </div>
+                <div class="col-md-12">
+                    <p class="fs-5 fw-light">
+
+                <br>
+                        Pakistan has a large logistics sector, which is valued at about US$35 billion and has a double-digit growth rate. Pakistan has given prime importance to developing hard infrastructure during the last two decades to facilitate the flow of goods and to ease access to the markets but still there is a long way to go. Pakistan is ranked at 95 among 167 countries on the aggregated Logistic Performance Index (LPI) in 2019. It puts Pakistan behind even some Asian countries due to relatively less spending on infrastructure projects including airports and highways.
+                    </p>
+                    <p class="fs-5 fw-light">
+                        
+                <br>
+                      Industrial sector in Pakistan have expanded significantly over the last two decades. As such, the logistics industry has also expanded to meet the demand of transporting goods made by this expanding industrial sector. To be more efficient the logistics sector needs to be more organized, and adopt 360-degree business approach to avoid operational losses. No one can deny the importance of support from the government agencies to acquire this goal. In Pakistan, we have roads extending over 264,000 kms that signifies the importance of trucking in facilitating the efficient flow of goods across the country and beyond its borders to the neighboring countries. The logistics sector is facing myriad of problems including tax structure, port infrastructure, warehousing, rising fuel costs, technology deterrence etc. These problems are the most obvious ones and have mostly been discussed and taken care of occasionally. However, the most serious problems are shortage of available options to our small and medium enterprises and the new startups. The logistics industry as a whole is totally fragmented, even sub division
+
+of the industry such as domestic and international courier, trucking, warehousing and air and sea freight are so disjointed that a small and / or new enterprise first finds it extremely difficult to source required service both for domestic or export purpose and is totally depended on MNC and local companies operating in this sector to ask for exorbitant prices. These are the most common problems having relatively less attention of the logistics sector.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-5 border-top bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                      <h5 class="c2s-subtitle">Why Click2Ship</h5>
+                    <h1 class="fs-2 fw-bolder">                 
+                    Quality Services
+                  </h1>
+                </div>
+
+            </div>
+            <div class="row mt-5">
+                <div class="col-md-12">
+                    <p class="">
+                        Click2Ship allows customers to compare quotes for all logistical needs both for international and domestic services and chose the product and service that best fit the customers requirements and the cost they pay. Click2Ship use reputable shipping and logistics partners to offer a variety of premium, economy, next-
+
+day collection and drop-off service along trucking and warehousing solutions at the cheapest possible rates. Some of our shipping partners are:
+ </p>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+          <h4>Services</h4>
+        <ul class="fs-5 fw-bold mt-2">
+<li>DHL</li>
+<li>FedEx</li>
+<li>UPS</li>
+<li>TCS</li>
+<li>Leopard</li>
+<li>M&P</li>
+<li>Asia Industrial Hub</li>
+<li>APX Logistics</li>
+<li>TRAX Logistics</li>
+<li>Shyft Trucking</li>
+<li>Asia Trucking</li>
+</ul>
+    </div>
+    <div class="col-md-6">
+          <h4>Key Features of click2ship</h4>
+                 <ul>
+                     <li>Choose from a wide range of reputable companies to ship your parcels</li>
+                     <li>
+                         
+
+Use best priced full load within city or across country trucking solution
+
+                     </li>
+                     <li>
+                         
+State of the art warehousing solution options for open, shelved and cold storage
+
+                     </li>
+                     <li>
+                         
+Book parcel delivery domestically or to over 240 international destinations
+
+                     </li>
+                     <li>
+                         
+Choose from collection & drop-off services
+                     </li>
+                     <li>
+                         
+
+Manage all parcel deliveries in one place
+                     </li>
+                 </ul>
+    </div>
+</div>
+<div class="row mt-2">
+    <div class="col-md-12">
+        <p>Click2Ship can help compare services and price to help customers book for items of all weights and sizes.</p>
+
+<p>
+    Whether customers are sending a parcel internationally or domestically, a whole pallet for delivery, have to ship a container load within city or across the country , or have a warehousing need just enter the dimensions and weight of the shipment into our shipping quote calculator and we provide them with a list of services to choose from and prices tailored to the weight and size of the shipments.
+</p>
+<p>
+    
+Customers can save time by having the best rates all available for variety of supplier in the same place, instead of having to search for the same through multiple different avenues and relay on what different vendors have to offer.
+</p>
+
+<p>We provide our customers with premium logistics services at discounted prices, making Click2Ship a valuable tool for both individuals and businesses looking to save money. We offer a range of services from economy to express, so that our customers have the choice to select the option that suits them best.</p>
+    </div>
+</div>
+                   
+                </div>
+                
+            </div>
+        </div>
+    </section>
+    <section class=" py-5 border-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h5 class="c2s-subtitle">Core Values</h5>
+                    <h1 class="fw-bolder">
+                        Modern & Trusted Logistics Company
+                        </h1>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col-md-6">
+                <div class="card shadow-0 border-1 border">
+                    <div class="card-body">
+                        <h4>Our Mission</h4>
+                        <p>
+
+                            We help customers to enter all the information required by customs for international deliveries, and also help them navigate any issues that may occur.
+                            </p>
+                    </div>
+                </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-0 border-1 border">
+                        <div class="card-body">
+                            <h4>Why Choose Us</h4>
+                            <p>
+    
+                                
+
+Our tailored software optimizes cargo and courier operations, enhancing visibility, efficiency, and service quality for exporters, importers, and more.
+
+                                </p>
+                        </div>
+                    </div>
+                    </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

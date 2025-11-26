@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:carrier_name",
+ "creation": "2025-11-06 16:50:48.702859",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "add_connection_section",
+  "carrier_name",
+  "carrier_id",
+  "test_mode",
+  "section_break_jffy",
+  "credentials"
+ ],
+ "fields": [
+  {
+   "fieldname": "carrier_name",
+   "fieldtype": "Link",
+   "label": "Carrier Name",
+   "options": "Carrier",
+   "unique": 1
+  },
+  {
+   "description": "Register a new carrier account.",
+   "fieldname": "add_connection_section",
+   "fieldtype": "Section Break",
+   "label": "Add Connection"
+  },
+  {
+   "fieldname": "carrier_id",
+   "fieldtype": "Data",
+   "label": "Carrier ID",
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_jffy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "credentials",
+   "fieldtype": "Table",
+   "label": "Credentials",
+   "options": "Carrier Connection Credentials"
+  },
+  {
+   "fieldname": "test_mode",
+   "fieldtype": "Select",
+   "label": "Test Mode",
+   "options": "\ntrue\nfalse"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-07 02:01:16.319634",
+ "modified_by": "Administrator",
+ "module": "Click2Ship Core",
+ "name": "Carrier Connection",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

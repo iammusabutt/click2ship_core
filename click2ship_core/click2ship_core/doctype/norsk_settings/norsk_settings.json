@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-10-21 20:15:00.081333",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "default_api_url",
+  "access_key",
+  "secret_access_key",
+  "endpoints_section",
+  "api_endpoint_quote",
+  "api_endpoint_shipment"
+ ],
+ "fields": [
+  {
+   "fieldname": "default_api_url",
+   "fieldtype": "Data",
+   "label": "Default Api URL"
+  },
+  {
+   "fieldname": "access_key",
+   "fieldtype": "Data",
+   "label": "Access Key ID"
+  },
+  {
+   "fieldname": "secret_access_key",
+   "fieldtype": "Data",
+   "label": "Secret Access Key"
+  },
+  {
+   "fieldname": "endpoints_section",
+   "fieldtype": "Section Break",
+   "label": "Endpoints"
+  },
+  {
+   "fieldname": "api_endpoint_quote",
+   "fieldtype": "Data",
+   "label": "Quote"
+  },
+  {
+   "fieldname": "api_endpoint_shipment",
+   "fieldtype": "Data",
+   "label": "Shipment"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-10-21 21:45:00.511351",
+ "modified_by": "Administrator",
+ "module": "Click2Ship Core",
+ "name": "Norsk Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

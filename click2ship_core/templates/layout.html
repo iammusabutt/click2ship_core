@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ title or "Click2Ship" }}</title>
+  <link rel="stylesheet" href="/assets/click2ship_core/css/style.css">
+</head>
+<body>
+  {% include "click2ship_core/templates/includes/header.html" %}
+
+
+    {% block content %}{% endblock %}
+
+
+  {% include "click2ship_core/templates/includes/footer.html" %}
+  <script src="/assets/click2ship_core/js/main.js"></script>
+</body>
+</html>

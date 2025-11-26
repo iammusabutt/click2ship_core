@@ -1,0 +1,177 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{origin_city} to {destination_city} by {airline}",
+ "creation": "2025-09-10 03:03:05.529574",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "origin_section",
+  "origin_city",
+  "origin_airport_code",
+  "origin_airport_name",
+  "column_break_txls",
+  "destination_city",
+  "destination_airport_code",
+  "destination_airport_name",
+  "section_break_leqd",
+  "airline",
+  "column_break_fcfy",
+  "air_freight_service_type",
+  "rates_section",
+  "minimum_rate",
+  "column_break_doyd",
+  "normal_rate",
+  "section_break_wwrj",
+  "air_tariff_rate",
+  "more_info_tab"
+ ],
+ "fields": [
+  {
+   "fieldname": "origin_section",
+   "fieldtype": "Section Break",
+   "label": "Origin and Destination"
+  },
+  {
+   "fieldname": "origin_city",
+   "fieldtype": "Link",
+   "label": "Origin City",
+   "options": "City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "origin_airport_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Origin Airport Code",
+   "options": "Airport",
+   "reqd": 1
+  },
+  {
+   "fieldname": "destination_city",
+   "fieldtype": "Link",
+   "label": "Destination City",
+   "options": "City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "destination_airport_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Destination Airport Code",
+   "options": "Airport",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_wwrj",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_txls",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "destination_airport_code.airport_name",
+   "fieldname": "destination_airport_name",
+   "fieldtype": "Data",
+   "label": "Destination Airport Name",
+   "options": "Airport",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "origin_airport_code.airport_name",
+   "fieldname": "origin_airport_name",
+   "fieldtype": "Data",
+   "label": "Origin Airport Name",
+   "options": "Airport",
+   "read_only": 1
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "minimum_rate",
+   "fieldtype": "Currency",
+   "label": "Minimum Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_doyd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "normal_rate",
+   "fieldtype": "Currency",
+   "label": "Normal Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rates_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "Rates"
+  },
+  {
+   "fieldname": "section_break_leqd",
+   "fieldtype": "Section Break",
+   "label": "Additional Details"
+  },
+  {
+   "fieldname": "airline",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Airline",
+   "options": "Airline",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_fcfy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "air_freight_service_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Type",
+   "options": "Air Freight Service Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "air_tariff_rate",
+   "fieldtype": "Table",
+   "label": "Air Tariff Rate",
+   "options": "Air Tariff Rate"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-23 00:20:19.937425",
+ "modified_by": "Administrator",
+ "module": "Click2Ship Core",
+ "name": "Air Tariff",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

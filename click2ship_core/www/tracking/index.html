@@ -1,0 +1,46 @@
+{% extends "click2ship_core/templates/layout.html" %}
+
+{% block content %}
+<section id="banner" >
+        <div class="overlay"></div>
+        <div class="container  ">
+            <div class="row d-flex justify-content-between align-items-center">
+                <div class="col-md-6">
+                    <h1 class="fs-1 fw-bolder">
+                 PARCEL TRACKING
+                  
+                </h1>  <p class="mb-2 fs-3 text-muted">Need a hand with your shipping?
+                    Just reach out, we are here to help.</p>
+                
+            </div>
+            <div class="col-md-4 ms-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="#">
+                            <p class="text-muted">Enter your parcel tracking number in the box below and click 'Track my parcel':</p>
+                            <div class="form-group mb-2">
+                                <label for="" class="form-label">Tracking Number</label>
+                                <input type="text" class="form-control" placeholder="ex: 1ZQEQWE11222">
+                            </div>
+                            <div class="form-group">
+                            <button class="btn btn-primary btn-full btn-block w-100">Track Now</button>
+
+                            </div>
+                        </form>
+                    </div>
+                 </div>
+            </div>   
+            </div>
+        </div>
+<div class="divider"></div>
+    </section>
+<section class="py-5 border-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Result</h1>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
