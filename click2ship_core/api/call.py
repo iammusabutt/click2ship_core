@@ -265,34 +265,6 @@ def session_save():
         return {"status": "error", "message": str(e)}
 
 
-@frappe.whitelist(allow_guest=True)
-def session_save_bu():
-    """
-    Save or update session data.
-    Accepts 'quote' and/or 'booking' in form_dict.
-    """
-    try:
-        # Get session key
-        session_key = frappe.session.sid
-
-        # Fetch existing session data or initialize
-        session_data = frappe.cache().get_value(f"session_data:{session_key}") or {}
-
-        # Update quote if provided
-        quote = frappe.form_dict.get("quote")
-        if quote:
-            if isinstance(quote, str):
-                quote = json.loads(quote)
-            session_data['quote'] = quote
-
-        # Save combined data back to cache (expires in 1 hour)
-        frappe.cache().set_value(f"session_data:{session_key}", session_data, expires_in_sec=3600)
-
-        return {"status": "success", "data": session_data}
-
-    except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "session_save error")
-        return {"status": "error", "message": str(e)}
 # -------------------------------------------------------------
 # Retrieve the data from current user's server session
 # -------------------------------------------------------------
@@ -307,21 +279,8 @@ def session_data():
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "session_data error")
         return {"status": "error", "message": str(e)}
-    
-@frappe.whitelist(allow_guest=True)
-def get_selected_quote_bu():
-    """
-    Fetch the selected quote from cache for the current session
-    """
-    try:
-        session_key = frappe.session.sid
-        quote = frappe.cache().get_value(f"selected_quote:{session_key}") or {}
-        return quote
-        
-    except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Fetch Selected Quote Failed")
-        return {"status": "error", "message": str(e)}
-        
+
+
 @frappe.whitelist(allow_guest=True)
 def book():
     """

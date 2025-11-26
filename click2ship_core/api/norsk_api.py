@@ -114,61 +114,23 @@ def get_norsk_shipping_quote():
 
 
 # -------------------------------------------------------------
-# Retrieve the stored selected quote
-# -------------------------------------------------------------
-@frappe.whitelist(allow_guest=True)
-def get_selected_quote():
-    return frappe.session.get("selected_quote") or []
-
-
-# -------------------------------------------------------------
-# Save booking details in cache
-# -------------------------------------------------------------    
-@frappe.whitelist(allow_guest=True)
-def save_booking_details_in_cache():
-    """
-    Store booking payload JSON in frappe.cache against session_id
-    """
-    try:
-        data = frappe.form_dict.get("data")
-
-        if isinstance(data, str):
-            import json
-            data = json.loads(data)
-
-        if not data:
-            frappe.throw("No booking data received.")
-
-        session_key = frappe.session.sid
-        frappe.cache().set_value(f"booking_details:{session_key}", data, expires_in_sec=3600)
-
-        return {
-            "status": "success",
-            "logged_in": frappe.session.user != "Guest"
-        }
-
-    except Exception    as e:
-        frappe.log_error(frappe.get_traceback(), "Booking Cache Store Failed")
-        return {"status": "error", "message": str(e)}
-
-# -------------------------------------------------------------
 # Get booking details from cache
 # -------------------------------------------------------------
 @frappe.whitelist(allow_guest=True)
 def get_booking_details_from_cache():
     try:
         session_key = frappe.session.sid
-        data = frappe.cache().get_value(f"booking_details:{session_key}")
+        session_data = frappe.cache().get_value(f"session_data:{session_key}") or {}
+        booking_details = session_data.get("booking", {})
 
-        if not data:
+        if not booking_details:
             frappe.throw("No booking data found in cache for this session.")
 
-        return {"status": "success", "data": data}
+        return {"status": "success", "data": booking_details}
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Booking Cache Fetch Failed")
         return {"status": "error", "message": str(e)}
-
 
 @frappe.whitelist(allow_guest=True)
 def get_session_data():
@@ -223,8 +185,6 @@ def book_norsk_shipment():
 
         # API JSON Response
         resp_json = response.json()
-        print(resp_json);
-        return
         #frappe.throw(f"RESPONSE: {json.dumps(barcode, indent=2)}")
         #return
 
@@ -272,8 +232,9 @@ def get_cached_booking_details():
     """
     try:
         session_key = frappe.session.sid
-        data = frappe.cache().get_value(f"booking_details:{session_key}") or {}
-        return data
+        session_data = frappe.cache().get_value(f"session_data:{session_key}") or {}
+        booking_details = session_data.get("booking", {})
+        return booking_details
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Fetch Booking Cache Failed")
         return {"status": "error", "message": str(e)}

@@ -496,7 +496,8 @@ function getFormData(formSelector, prefixToRemove) {
     return data;
 }
 
-document.getElementById("generatePayloadBtn").addEventListener("click", () => {
+document.getElementById("generatePayloadBtn").addEventListener("click", (event) => {
+    event.preventDefault();
     const csrfToken = "{{ csrf_token }}";
     const serverDateGMT = "{{ server_date_gmt }}";
 
@@ -523,17 +524,33 @@ document.getElementById("generatePayloadBtn").addEventListener("click", () => {
 
     // Item Lines
     const itemLines = [];
-    document.querySelectorAll("#item-lines .item-line").forEach(row => {
-        const desc = row.querySelector('[name="Description[]"]').value.trim();
+    const itemLineRows = document.querySelectorAll("#item-lines .item-line");
+    for (const row of itemLineRows) {
+        const desc_input = row.querySelector('[name="Description[]"]');
+        const desc = desc_input.value.trim();
+        if (!desc) {
+            desc_input.classList.add('is-invalid');
+            return; 
+        } else {
+            desc_input.classList.remove('is-invalid');
+        }
+
         const qty = parseFloat(row.querySelector('[name="Quantity[]"]').value) || 0;
         const value = parseFloat(row.querySelector('[name="ItemValue[]"]').value) || 0;
         itemLines.push({
-            Description: desc,
-            Quantity: qty,
-            ItemValue: value,
-            LineSubtotal: qty * value
+            Products: [
+                {
+                    ProductDescription: desc || "No description available",
+                    CountryOfManufacture: additionalData.CustomsCountryOfManufacture || "AU",
+                    HSCode: "00000000" || "00000000",
+                    ProductUnitValue: value,
+                    Currency: "USD",
+                    ProductUnitWeight: 1,
+                    ProductQuantity: qty
+                }
+            ]
         });
-    });
+    }
 
     // Validation: basic required fields
     const missingShipper = Object.entries(shipperData).filter(([k,v]) => !v && !k.includes("Address2") && !k.includes("Address3")).map(([k])=>k);
@@ -547,12 +564,28 @@ document.getElementById("generatePayloadBtn").addEventListener("click", () => {
 
     // Compose payload
     const payload = {
-        Pieces: itemLines,
-        Collection: shipperData,
+        Pieces: [
+            {
+                Depth: 1,
+                Height: 1,
+                Width: 1,
+                Weight: 1,
+                NumberOfPieces: itemLines.length,
+                Products: itemLines.flatMap(line => line.Products)
+            }
+        ],
+        ReadyByDate: serverDateGMT,
+        Hawb: "12345678",
+        Description: "No details available",
+        Value: 450,
+        Collection: {
+            ...shipperData,
+            PackageLocation: "GB",
+            CloseTime: "16:00"
+        },
         Shipper: shipperData,
         Consignee: deliveryData,
         Importer: deliveryData,
-        ReadyByDate: serverDateGMT,
         Service: {
             Code: selected_quote.quote.ServiceCode || "UPSE",
             Enhancements: selected_quote.quote.Costs?.map(c => ({ Code: c.Reference })) || []
