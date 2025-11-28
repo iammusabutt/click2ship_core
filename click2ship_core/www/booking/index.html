@@ -563,34 +563,267 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
     }
 
     // Compose payload
-    const payload = {
-        Pieces: [
-            {
-                Depth: 1,
-                Height: 1,
-                Width: 1,
-                Weight: 1,
-                NumberOfPieces: itemLines.length,
-                Products: itemLines.flatMap(line => line.Products)
+    let payload;
+    const provider = selected_quote.quote.Provider;
+
+    if (provider === 'Norsk') {
+        payload = {
+            Pieces: [
+                {
+                    Depth: 1,
+                    Height: 1,
+                    Width: 1,
+                    Weight: 1,
+                    NumberOfPieces: itemLines.length,
+                    Products: itemLines.flatMap(line => line.Products)
+                }
+            ],
+            ReadyByDate: serverDateGMT,
+            Hawb: "12345678",
+            Description: "No details available",
+            Value: 450,
+            Collection: {
+                ...shipperData,
+                PackageLocation: "GB",
+                CloseTime: "16:00"
+            },
+            Shipper: shipperData,
+            Consignee: deliveryData,
+            Importer: deliveryData,
+            Service: {
+                Code: selected_quote.quote.ServiceCode || "UPSE",
+                Enhancements: selected_quote.quote.Costs?.map(c => ({ Code: c.Reference })) || []
             }
-        ],
-        ReadyByDate: serverDateGMT,
-        Hawb: "12345678",
-        Description: "No details available",
-        Value: 450,
-        Collection: {
-            ...shipperData,
-            PackageLocation: "GB",
-            CloseTime: "16:00"
-        },
-        Shipper: shipperData,
-        Consignee: deliveryData,
-        Importer: deliveryData,
-        Service: {
-            Code: selected_quote.quote.ServiceCode || "UPSE",
-            Enhancements: selected_quote.quote.Costs?.map(c => ({ Code: c.Reference })) || []
-        }
-    };
+        };
+    } else if (provider === 'Skynet') {
+        const total_weight = itemLines.flatMap(line => line.Products).reduce((total, p) => total + (p.ProductQuantity * p.ProductUnitWeight), 0) || 1;
+        const date = new Date(serverDateGMT);
+        const y = date.getFullYear();
+        const m = ('0' + (date.getMonth() + 1)).slice(-2);
+        const d = ('0' + date.getDate()).slice(-2);
+        const readyTime = `${y}/${m}/${d} 12:00:00`;
+        const closeTime = `${y}/${m}/${d} 16:00:00`;
+
+        payload = [{
+            ThirdPartyToken: "",
+            SenderDetails: {
+                SenderName: shipperData.ContactName,
+                SenderCompanyName: "N/A",
+                SenderCountryCode: shipperData.CountryCode,
+                SenderAdd1: shipperData.Address1,
+                SenderAdd2: shipperData.Address2,
+                SenderAdd3: shipperData.Address3,
+                SenderAddCity: shipperData.City,
+                SenderAddState: "",
+                SenderAddPostcode: shipperData.Zipcode,
+                SenderPhone: shipperData.PhoneNumber,
+                SenderEmail: shipperData.Email,
+                SenderFax: "",
+                SenderKycType: "",
+                SenderKycNumber: "",
+                SenderReceivingCountryTaxID: ""
+            },
+            ReceiverDetails: {
+                ReceiverName: deliveryData.ContactName,
+                ReceiverCompanyName: "N/A",
+                ReceiverCountryCode: deliveryData.CountryCode,
+                ReceiverAdd1: deliveryData.Address1,
+                ReceiverAdd2: deliveryData.Address2,
+                ReceiverAdd3: deliveryData.Address3,
+                ReceiverAddCity: deliveryData.City,
+                ReceiverAddState: "",
+                ReceiverAddPostcode: deliveryData.Zipcode,
+                ReceiverMobile: deliveryData.PhoneNumber,
+                ReceiverPhone: deliveryData.PhoneNumber,
+                ReceiverEmail: deliveryData.Email,
+                ReceiverAddResidential: "N",
+                ReceiverFax: "",
+                ReceiverKycType: "",
+                ReceiverKycNumber: ""
+            },
+            PackageDetails: {
+                GoodsDescription: additionalData.PackageContents,
+                CustomValue: parseFloat(document.getElementById('grand-total').textContent) || 0,
+                CustomCurrencyCode: "GBP",
+                InsuranceValue: "0.00",
+                InsuranceCurrencyCode: "GBP",
+                ShipmentTerm: "",
+                GoodsOriginCountryCode: shipperData.CountryCode,
+                DeliveryInstructions: additionalData.CourierNotes,
+                Weight: total_weight,
+                WeightMeasurement: "KG",
+                NoOfItems: itemLines.length,
+                CubicL: 1, CubicW: 1, CubicH: 1,
+                CubicWeight: 1,
+                ServiceTypeName: "EN",
+                BookPickUP: false,
+                AlternateRef: "",
+                SenderRef1: "Click2Ship Shipment",
+                SenderRef2: "",
+                SenderRef3: "",
+                DeliveryAgentCode: "",
+                DeliveryRouteCode: "",
+                BusinessType: "B2B",
+                ShipmentResponseItem: itemLines.map((line, index) => {
+                    const product = line.Products[0];
+                    return {
+                        ItemAlt: "",
+                        ItemNoOfPcs: 1,
+                        ItemCubicL: 1, ItemCubicW: 1, ItemCubicH: 1,
+                        ItemWeight: product.ProductUnitWeight * product.ProductQuantity,
+                        ItemCubicWeight: 0,
+                        ItemDescription: product.ProductDescription,
+                        ItemCustomValue: product.ProductUnitValue,
+                        ItemCustomCurrencyCode: "GBP",
+                        Notes: "",
+                        Pieces: [{
+                            HarmonisedCode: product.HSCode,
+                            GoodsDescription: product.ProductDescription,
+                            Content: "",
+                            Notes: "",
+                            SenderRef1: `item-${index+1}`,
+                            Quantity: product.ProductQuantity,
+                            Weight: product.ProductUnitWeight * product.ProductQuantity,
+                            ManufactureCountryCode: product.CountryOfManufacture,
+                            OriginCountryCode: shipperData.CountryCode,
+                            CurrencyCode: "GBP",
+                            CustomsValue: product.ProductUnitValue
+                        }]
+                    };
+                }),
+                CODAmount: 0.0,
+                CODCurrencyCode: "GBP",
+                Bag: 0,
+                Notes: "",
+                OriginLocCode: "",
+                BagNumber: 0,
+                DeadWeight: total_weight,
+                ReasonExport: additionalData.CustomsExportReason,
+                DestTaxes: 0.0,
+                Security: 0.0,
+                Surcharge: 0.0,
+                ReceiverTaxID: "",
+                OrderNumber: "",
+                Incoterms: "CIF",
+                ClearanceReference: ""
+            },
+            PickupDetails: {
+                ReadyTime: readyTime,
+                CloseTime: closeTime,
+                SpecialInstructions: "",
+                Address1: shipperData.Address1,
+                Address2: shipperData.Address2,
+                Address3: shipperData.Address3,
+                AddressState: "",
+                AddressCity: shipperData.City,
+                AddressPostalCode: shipperData.Zipcode,
+                AddressCountryCode: shipperData.CountryCode
+            }
+        }];
+    } else if (provider === 'Karrio') {
+        const total_weight = itemLines.flatMap(line => line.Products).reduce((total, p) => total + (p.ProductQuantity * p.ProductUnitWeight), 0) || 1;
+
+        const createAddress = (data, companyName = "N/A") => ({
+            postal_code: data.Zipcode,
+            city: data.City,
+            person_name: data.ContactName,
+            company_name: companyName,
+            country_code: data.CountryCode,
+            email: data.Email,
+            phone_number: data.PhoneNumber,
+            address_line1: data.Address1,
+            address_line2: data.Address2,
+            state_code: data.State || "",
+            federal_tax_id: "",
+            state_tax_id: "",
+            residential: false,
+            street_number: "",
+            validate_location: false
+        });
+
+        const parcelItems = itemLines.map(line => {
+            const product = line.Products[0];
+            return {
+                weight: product.ProductUnitWeight * product.ProductQuantity,
+                weight_unit: "KG",
+                description: product.ProductDescription,
+                quantity: product.ProductQuantity,
+                sku: product.sku || "",
+                hs_code: product.HSCode,
+                value_amount: product.ProductUnitValue,
+                value_currency: "GBP",
+                origin_country: shipperData.CountryCode
+            };
+        });
+
+        payload = {
+            recipient: createAddress(deliveryData),
+            shipper: createAddress(shipperData),
+            return_address: createAddress(shipperData),
+            billing_address: createAddress(shipperData),
+            parcels: [{
+                weight: total_weight,
+                width: 1,
+                height: 1,
+                length: 1,
+                weight_unit: "KG",
+                dimension_unit: "CM",
+                items: parcelItems,
+                is_document: false,
+                packaging_type: "your_packaging"
+            }],
+            payment: {
+                paid_by: "sender",
+                currency: "GBP"
+            },
+            customs: {
+                commodities: parcelItems,
+                duty: {
+                    paid_by: "sender",
+                    currency: "GBP",
+                    declared_value: parseFloat(document.getElementById('grand-total').textContent) || 0,
+                },
+                incoterm: "DDU", // Delivered Duty Unpaid
+                certify: true,
+                signer: shipperData.ContactName,
+                content_type: "merchandise"
+            },
+            service: selected_quote.quote.ServiceCode,
+            label_type: "PDF",
+            options: {}
+        };
+    } else {
+        // Default case or error handling
+        // For now, let's assume the existing payload as default if provider is not matched.
+        payload = {
+            Pieces: [
+                {
+                    Depth: 1,
+                    Height: 1,
+                    Width: 1,
+                    Weight: 1,
+                    NumberOfPieces: itemLines.length,
+                    Products: itemLines.flatMap(line => line.Products)
+                }
+            ],
+            ReadyByDate: serverDateGMT,
+            Hawb: "12345678",
+            Description: "No details available",
+            Value: 450,
+            Collection: {
+                ...shipperData,
+                PackageLocation: "GB",
+                CloseTime: "16:00"
+            },
+            Shipper: shipperData,
+            Consignee: deliveryData,
+            Importer: deliveryData,
+            Service: {
+                Code: selected_quote.quote.ServiceCode || "UPSE",
+                Enhancements: selected_quote.quote.Costs?.map(c => ({ Code: c.Reference })) || []
+            }
+        };
+    }
 
     fetch("/api/method/click2ship_core.api.call.session_save", {
         method: "POST",

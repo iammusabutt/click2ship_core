@@ -64,15 +64,94 @@ def get_shipping_rates():
         return response.json()
 
     except requests.exceptions.HTTPError as e:
-        frappe.log_error(f"Skynet API HTTP Error (/rates): {str(e)}", "Skynet API")
+        frappe.log_error("Skynet API HTTP Error (/rates)", f"{e}\nResponse: {getattr(response, 'text', None)}")
         return {"error": "HTTPError", "message": str(e), "response": getattr(response, "text", None)}
 
     except requests.exceptions.RequestException as e:
-        frappe.log_error(f"Skynet API Request Error (/rates): {str(e)}", "Skynet API")
+        frappe.log_error("Skynet API Request Error (/rates)", str(e))
         return {"error": "RequestException", "message": str(e)}
 
     except Exception as e:
-        frappe.log_error(f"Unexpected Error (/rates): {frappe.get_traceback()}", "Skynet API")
+        frappe.log_error("Unexpected Error (/rates)", frappe.get_traceback())
         return {"error": "Exception", "message": str(e)}
     
-    
+@frappe.whitelist(allow_guest=True)
+def shipment():
+    try:
+        # Step 1: Get user input (shipmentInput)
+        raw_data = frappe.request.get_data(as_text=True)
+        if not raw_data:
+            frappe.throw("No shipment input data received.")
+        shipment_input = json.loads(raw_data)
+
+        # Step 2: Prepare request
+        settings = get_skynet_settings()
+        url = f"{settings['api_url']}shipments"
+        headers = get_auth_headers()
+        headers["Content-Type"] = "application/json"
+
+        # Step 3: Send request
+        response = requests.post(url, headers=headers, json=shipment_input, timeout=30)
+        response.raise_for_status()
+
+        # Step 4: Process the response and store in ERPNext
+        resp_json = response.json()
+        
+        # The API might return a list directly, or a dict with a "message" key.
+        if isinstance(resp_json, dict):
+            message = resp_json.get("message")
+        else:
+            message = resp_json
+        
+        if not message or not isinstance(message, list) or not message[0]:
+            frappe.throw("Invalid response format from Skynet API.")
+            
+        shipment_details = message[0]
+        shipment_number = shipment_details.get("ShipmentNumber")
+        label_url = shipment_details.get("LabelURL")
+
+        if not shipment_number or not label_url:
+            frappe.throw("ShipmentNumber or LabelURL not found in Skynet response.")
+
+        # Download the label from the URL
+        label_response = requests.get(label_url)
+        label_response.raise_for_status()
+        label_content = label_response.content
+
+        # Store into ERPNext Doctype
+        doc = frappe.new_doc("Shipment Booking")
+        doc.shipment_barcode = shipment_number
+        doc.user = frappe.session.user
+        doc.insert(ignore_permissions=True)
+        
+        # Create a file document for the label
+        file_name = f"Shipment_Label_{shipment_number}.pdf"
+        file_doc = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "attached_to_doctype": "Shipment Booking",
+            "attached_to_name": doc.name,
+            "is_private": 1,
+            "content": label_content
+        })
+        file_doc.insert(ignore_permissions=True)
+
+        # Return success response
+        return {
+            "success": True,
+            "shipment_id": doc.name,
+            "barcode": shipment_number,
+            "label_url": file_doc.file_url  # ERPNext file URL
+        }
+
+    except requests.exceptions.HTTPError as e:
+        frappe.log_error("Skynet API HTTP Error (/shipments)", f"{e}\nResponse: {getattr(response, 'text', None)}")
+        return {"error": "HTTPError", "message": str(e), "response": getattr(response, "text", None)}
+
+    except requests.exceptions.RequestException as e:
+        frappe.log_error("Skynet API Request Error (/shipments)", str(e))
+        return {"error": "RequestException", "message": str(e)}
+
+    except Exception as e:
+        frappe.log_error("Unexpected Error (/shipments)", frappe.get_traceback())
+        return {"error": "Exception", "message": str(e)}

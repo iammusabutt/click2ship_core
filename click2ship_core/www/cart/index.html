@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
         bookNowBtn.innerHTML = "Booking...";
 
         // Step 1: get booking details from cache
-        fetch("/api/method/click2ship_core.api.norsk_api.get_booking_details_from_cache", {
+        fetch("/api/method/click2ship_core.api.call.session_data", {
             method: "GET",
             headers: { "X-Frappe-CSRF-Token": csrfToken },
             credentials: "include"
@@ -135,16 +135,30 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(res => res.json())
         .then(r => {
             if (r.message && r.message.status === "success") {
-                const bookingData = r.message.data;
+                const quote_data = r.message.data.quote;
+                const booking_data = r.message.data.booking;
 
+                console.log("Provider:", quote_data.Provider);
                 // Step 2: book shipment
-                return fetch("/api/method/click2ship_core.api.norsk_api.book_norsk_shipment", {
+                let bookingApiUrl;
+                if (quote_data.Provider === 'Norsk') {
+                    bookingApiUrl = "/api/method/click2ship_core.api.norsk_api.book_norsk_shipment";
+                } else if (quote_data.Provider === 'Skynet') {
+                    bookingApiUrl = "/api/method/click2ship_core.api.skynet_api.shipment";
+                } else if (quote_data.Provider === 'Karrio') {
+                    bookingApiUrl = "/api/method/click2ship_core.api.karrio_api.shipment";
+                } else {
+                    console.error("Unknown provider:", quote_data.Provider);
+                    throw new Error("Unknown provider for booking.");
+                }
+
+                return fetch(bookingApiUrl, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "X-Frappe-CSRF-Token": csrfToken
                     },
-                    body: JSON.stringify(bookingData),
+                    body: JSON.stringify(booking_data),
                     credentials: "include"
                 });
             } else {
