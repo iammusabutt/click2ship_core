@@ -39,13 +39,13 @@ Adjust the path if your bench directory is located elsewhere.
 Use `bench get-app` to download the app into your bench:
 
 ```bash
-bench get-app click2ship_core YOUR_REPOSITORY_URL
+bench get-app click2ship_core git@github.com:your-org/click2ship_core.git
 ```
+Or
 
-Replace `YOUR_REPOSITORY_URL` with the actual Git URL of the `click2ship_core` repository, for example:
-
-- SSH: `git@github.com:your-org/click2ship_core.git`
-- HTTPS: `https://github.com/your-org/click2ship_core.git`
+```bash
+bench get-app click2ship_core https://github.com/your-org/click2ship_core.git
+```
 
 ---
 
