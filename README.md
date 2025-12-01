@@ -270,6 +270,6 @@ Ensure this matches the `LICENSE` file in your repository.
 
 For questions, support, or deployment-related issues for `click2ship_core` and the Click2Ship ERPNext setup, please use your standard support channels. For example:
 
-- Website: https://click2ship.net
-- Email: support@click2ship.net
+- Website: https://drcodex.com
+- Email: iammusabutt@gmail.com
 - Issue Tracker: URL of your Git repository issues page
