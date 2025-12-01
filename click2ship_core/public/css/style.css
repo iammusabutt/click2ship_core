@@ -217,10 +217,15 @@ section#banner {
 }
 .nav-btn.-outlined {
     border-color: #db2326;
+    color: #db2326;
     background-color: #ffffff;
     transition: background-color 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+    padding: 0.391rem 0.8rem;
+    font-size: 0.812rem;
 }
 .nav-btn.-outlined:hover {
+    color: #ffffff;
     border-color: #db2326;
     background-color: #db2326;
 }

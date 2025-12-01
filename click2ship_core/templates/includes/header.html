@@ -115,16 +115,19 @@
                   <li class="nav-item ">
                     <a class="nav-link" href="quote">Get Qoute</a>
                   </li>
-                  <li class="nav-item nav-btn -outlined">
-                    <a class="nav-btn-link" href="#">Sign Up</a>
-                  </li>
                     {% if frappe.session.user != "Guest" %}
+                        <li class="nav-item nav-btn -outlined">
+                            <a class="nav-btn-link" href="/dashboard">My Account</a>
+                        </li>
                         <li class="nav-item nav-btn">
-                            <a class="nav-btn-link" href="/dashboard">Dashboard</a>
+                            <a class="nav-btn-link" href="/api/method/logout">Logout</a>
                         </li>
                     {% else %}
+                        <li class="nav-item nav-btn -outlined">
+                            <a class="nav-btn-link" href="/signup">Sign Up</a>
+                        </li>
                         <li class="nav-item nav-btn">
-                            <a class="nav-btn-link" href="/signin">Login</a>
+                            <a class="nav-btn-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
                         </li>
                     {% endif %}
                 
@@ -133,3 +136,73 @@
             </div>
           </nav>
     </header>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="login-form">
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="login-email" placeholder="Email address" required>
+                                <label for="login-email">Email address</label>
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="login-password" placeholder="Password" required>
+                                <label for="login-password">Password</label>
+                            </div>
+                        </div>
+                        <div id="login-error" class="text-danger mb-3"></div>
+                        <button type="submit" class="btn btn-red">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const loginForm = document.getElementById("login-form");
+            if(loginForm) {
+                loginForm.addEventListener("submit", function(event) {
+                    event.preventDefault();
+                    const email = document.getElementById("login-email").value;
+                    const password = document.getElementById("login-password").value;
+                    const loginError = document.getElementById("login-error");
+
+                    // Clear previous errors
+                    loginError.textContent = "";
+
+                    fetch("/api/method/login", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `usr=${encodeURIComponent(email)}&pwd=${encodeURIComponent(password)}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.message === "Logged In") {
+                            window.location.href = "/dashboard"; // Redirect to dashboard page
+                        } else {
+                            // Frappe login API returns an error message in data.message on failure
+                            loginError.textContent = data.message || "Invalid username or password.";
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Login error:", err);
+                        loginError.textContent = "An error occurred during login.";
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

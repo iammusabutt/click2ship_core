@@ -1,10 +1,12 @@
 // Wait until DOM is ready
 document.addEventListener("DOMContentLoaded", function () {
     const quoteResponse = document.getElementById("quoteResponse");
+    const loader = document.getElementById("loader");
     const quoteInput = JSON.parse(sessionStorage.getItem("quote_request"));
 
     if (!quoteInput) {
         quoteResponse.innerText = "No quote data found.";
+        if(loader) loader.classList.add("hidden");
         return;
     }
 
@@ -82,9 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         </div>
                     </div>
                     <div class="flex-100">
-                        <div class="nav-item nav-btn -outlined">
-                            <a href="#" class="nav-btn-link book-now-btn" data-quote='${JSON.stringify(q)}'>Book Now</a>
-                        </div>
+                        <button type="button" class="nav-btn -outlined book-now-btn" data-quote='${JSON.stringify(q)}'>Book Now</button>
                     </div>
                 </div>
             `;
@@ -95,6 +95,9 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch(err => {
         console.error("Fetch error:", err);
         quoteResponse.innerText = "Error fetching shipping quotes.";
+    })
+    .finally(() => {
+        if(loader) loader.classList.add("hidden");
     });
 
     // Handle Book Now

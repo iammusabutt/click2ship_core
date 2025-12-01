@@ -3,7 +3,7 @@
 {% block content %}
 <h2>ERPNext Token Auth API Test</h2>
 
-<button id="get-user-btn">Get ERPNext User (via token)</button>
+<button id="get-user-btn" class="nav-btn -outlined">Get ERPNext User (via token)</button>
 
 <pre id="api-response">Waiting for response...</pre>
 
@@ -34,7 +34,7 @@
   });
 </script>
 <div>
-  <button id="get-rates-btn" class="btn btn-primary">Get Rates</button>
+  <button id="get-rates-btn" class="nav-btn -outlined">Get Rates</button>
   <pre id="rates-result" style="background:#f5f5f5; padding:10px; margin-top:10px;"></pre>
 </div>
 
@@ -93,9 +93,9 @@
 
 
 <!-- Buttons -->
-<button id="karrio-quotes-btn">Get Quotes</button>
-<button id="karrio-carriers-btn">List Carriers</button>
-<button id="create-connection-btn">Create Carrier Connection</button>
+<button id="karrio-quotes-btn" class="nav-btn -outlined">Get Quotes</button>
+<button id="karrio-carriers-btn" class="nav-btn -outlined">List Carriers</button>
+<button id="create-connection-btn" class="nav-btn -outlined">Create Carrier Connection</button>
 
 <!-- Output Display -->
 <pre id="karrio-response"></pre>
@@ -198,7 +198,7 @@ document.getElementById("create-connection-btn").addEventListener("click", () =>
 
     <input type="text" id="origin" placeholder="Origin Airport Code">
     <input type="text" id="destination" placeholder="Destination Airport Code">
-    <button id="search-btn">Search</button>
+    <button id="search-btn" class="nav-btn -outlined">Search</button>
 
     <pre id="result"></pre>
 

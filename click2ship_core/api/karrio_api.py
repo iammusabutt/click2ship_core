@@ -3,9 +3,9 @@ import frappe
 from frappe import _
 from frappe.utils import now_datetime, get_datetime, cstr
 import json
-#KARRIO_BASE_URL = "https://api.click2ship.net"
+KARRIO_BASE_URL = "https://api.click2ship.net"
 
-KARRIO_BASE_URL = "https://noninterpretational-madelene-geminally.ngrok-free.dev"
+#KARRIO_BASE_URL = "https://noninterpretational-madelene-geminally.ngrok-free.dev"
 
 def _get_settings():
     """Get Karrio Settings Doc"""
@@ -243,84 +243,67 @@ def get_rates():
         "raw": err
     }
 
-
-
 @frappe.whitelist(allow_guest=True)
-def list_carriers():
+def shipment():
     """
-    List all configured carriers from Karrio API
+    Create a shipment booking with Karrio API
     """
-    access_token = _get_valid_token()
-    url = f"{KARRIO_BASE_URL}/v1/connections"
-
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Accept": "application/json",
-        "x-test-mode": "true"
-    }
-
     try:
-        response = requests.get(url, headers=headers, timeout=10)
+        # Get the access token
+        access_token = _get_valid_token()
+        url = f"{KARRIO_BASE_URL}/v1/proxy/shipments"
+        
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "x-test-mode": "true"
+        }
 
-        if response.status_code == 200:
-            return response.json()
+        # Prepare the shipment data (this should be replaced with actual data)
+        shipment_data = {
+            # Populate with actual shipment details
+        }
 
-        elif response.status_code == 401:
-            # Token might be expired — clear and retry
-            settings = _get_settings()
-            settings.access_token = None
-            settings.save(ignore_permissions=True)
-            frappe.db.commit()
-            return list_carriers()  # Retry with new token
+        response = requests.post(url, json=shipment_data, headers=headers, timeout=15)
 
-        else:
-            frappe.throw(f"Karrio Carriers API error: {response.status_code} {response.text}")
+        if response.status_code not in [200, 201]:
+            frappe.throw(f"Shipment API Error {response.status_code}: {response.text}")
 
-    except requests.exceptions.RequestException as e:
-        frappe.throw(f"Karrio Carriers API request failed: {str(e)}")
+        # Parse the response JSON
+        resp_json = response.json()
 
+        # Extract fields
+        barcode = resp_json.get("Barcode", {})
+        label_base64 = resp_json.get("Label", {})
 
-@frappe.whitelist(allow_guest=True)
-def create_connection():
-    """
-    Create a carrier connection in Karrio
-    Expects JSON body with carrier_name, carrier_id, credentials, etc.
-    """
-    access_token = _get_valid_token()
-    url = f"{KARRIO_BASE_URL}/v1/proxy/connections"
+        # Store into ERPNext Doctype
+        doc = frappe.new_doc("Shipment Booking")
+        doc.shipment_barcode = barcode
+        doc.user = frappe.session.user
+        doc.insert(ignore_permissions=True)
+        
+        file_name = f"Shipment_Label_{barcode}.pdf"
+        file_doc = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "attached_to_doctype": "Shipment Booking",
+            "attached_to_name": doc.name,   # Link to THIS booking record
+            "is_private": 1,
+            "content": base64.b64decode(label_base64)  # decode PDF
+        })
+        file_doc.insert(ignore_permissions=True)
 
-    # Parse raw JSON request body
-    try:
-        raw_data = frappe.request.get_data()
-        payload = json.loads(raw_data.decode("utf-8"))
+        return {
+            "success": True,
+            "shipment_id": doc.name,
+            "barcode": barcode,
+            "label_url": file_doc.file_url   # ERPNext file URL
+        }
+
+    except requests.exceptions.RequestException as req_err:
+        frappe.log_error(frappe.get_traceback(), "Karrio Shipment API Request Error")
+        frappe.throw(f"Network error while contacting Karrio Shipment API: {str(req_err)}")
+
     except Exception as e:
-        frappe.throw(_("Invalid or malformed JSON payload."))
-
-    if not payload.get("carrier_name"):
-        frappe.throw(_("carrier_name is required."))
-
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=15)
-
-        if response.status_code in (200, 201):
-            return response.json()
-
-        elif response.status_code == 401:
-            settings = _get_settings()
-            settings.access_token = None
-            settings.save(ignore_permissions=True)
-            frappe.db.commit()
-            return create_connection()  # Retry
-
-        else:
-            frappe.throw(f"Karrio Create Connection failed: {response.status_code} {response.text}")
-
-    except requests.exceptions.RequestException as e:
-        frappe.throw(f"Karrio API request failed: {str(e)}")
-
+        frappe.log_error(frappe.get_traceback(), "Unexpected Error in Shipment Booking")

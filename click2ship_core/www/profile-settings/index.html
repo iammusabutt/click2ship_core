@@ -1,0 +1,191 @@
+{% extends "click2ship_core/templates/layout.html" %}
+
+{% block content %}
+<section id="cover">
+    <div class="container">
+        <div class="quote-header"><h2>Profile & Settings</h2></div>
+    </div>
+    <div class="container">
+        <div class="row">
+            
+            {% include "click2ship_core/templates/includes/dashboard_left_nav.html" %}
+
+            <div class="col-md-9">
+                <div class="shipper-section">
+                    <h4>Profile Information</h4>
+                    <div id="profile-success-message" class="alert alert-success d-none" role="alert">
+                        Profile updated successfully!
+                    </div>
+                    <form id="profile-form">
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" value="{{ email }}" placeholder="Email" readonly>
+                                <label for="email">Email (Read-only)</label>
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="full_name" value="{{ full_name }}" placeholder="Full Name" readonly>
+                                <label for="full_name">Full Name (Read-only)</label>
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="first_name" value="{{ first_name }}" placeholder="First Name">
+                                <label for="first_name">First Name</label>
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="last_name" value="{{ last_name }}" placeholder="Last Name">
+                                <label for="last_name">Last Name</label>
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="phone" value="{{ phone }}" placeholder="e.g. +1 123 456 7890">
+                                <label for="phone">Phone</label>
+                            </div>
+                        </div>
+                        <button type="submit" id="save-profile-button" class="nav-btn -outlined" disabled>Save Profile</button>
+                    </form>
+                </div>
+                <div class="shipper-section mt-4">
+                    <h4>Set New Password</h4>
+                    <div id="password-success-message" class="alert alert-success d-none" role="alert">
+                        Password updated successfully!
+                    </div>
+                    <form id="change-password-form">
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="new-password" placeholder="New Password" required>
+                                <label for="new-password">New Password</label>
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="confirm-password" placeholder="Confirm New Password" required>
+                                <label for="confirm-password">Confirm New Password</label>
+                            </div>
+                        </div>
+                        <button type="submit" id="set-password-button" class="nav-btn -outlined" disabled>Set New Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const csrfToken = "{{ csrf_token }}";
+
+    // Password Change Form
+    const changePasswordForm = document.getElementById("change-password-form");
+    const newPasswordInput = document.getElementById("new-password");
+    const confirmPasswordInput = document.getElementById("confirm-password");
+    const setPasswordButton = document.getElementById("set-password-button");
+
+    if (changePasswordForm) {
+        function validatePasswordFields() {
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            setPasswordButton.disabled = !(newPassword && confirmPassword);
+        }
+
+        newPasswordInput.addEventListener("input", validatePasswordFields);
+        confirmPasswordInput.addEventListener("input", validatePasswordFields);
+
+        changePasswordForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (newPassword !== confirmPassword) {
+                alert("New password and confirm password do not match.");
+                return;
+            }
+
+            fetch("/api/method/click2ship_core.api.identity_api.set_password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Frappe-CSRF-Token": csrfToken
+                },
+                body: JSON.stringify({
+                    new_password: newPassword
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message === "Password updated successfully") {
+                    const successMessage = document.getElementById("password-success-message");
+                    successMessage.classList.remove("d-none");
+                    changePasswordForm.reset();
+                    setPasswordButton.disabled = true;
+                } else {
+                    alert("Error updating password.");
+                }
+            })
+            .catch(err => {
+                console.error("Error updating password:", err);
+                alert("An error occurred while updating the password.");
+            });
+        });
+    }
+
+    // Profile Update Form
+    const profileForm = document.getElementById("profile-form");
+    const saveProfileButton = document.getElementById("save-profile-button");
+    const phoneInput = document.getElementById("phone");
+    const firstNameInput = document.getElementById("first_name");
+    const lastNameInput = document.getElementById("last_name");
+
+    if (profileForm) {
+        function enableSaveButton() {
+            saveProfileButton.disabled = false;
+        }
+
+        phoneInput.addEventListener("input", enableSaveButton);
+        firstNameInput.addEventListener("input", enableSaveButton);
+        lastNameInput.addEventListener("input", enableSaveButton);
+
+        profileForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const phone = phoneInput.value;
+            const firstName = firstNameInput.value;
+            const lastName = lastNameInput.value;
+
+
+            fetch("/api/method/click2ship_core.api.identity_api.update_profile", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Frappe-CSRF-Token": csrfToken
+                },
+                body: JSON.stringify({
+                    phone: phone,
+                    first_name: firstName,
+                    last_name: lastName
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message === "Profile updated successfully") {
+                    const successMessage = document.getElementById("profile-success-message");
+                    successMessage.classList.remove("d-none");
+                    window.location.reload();
+                } else {
+                    alert("Error updating profile.");
+                }
+            })
+            .catch(err => {
+                console.error("Error updating profile:", err);
+                alert("An error occurred while updating the profile.");
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

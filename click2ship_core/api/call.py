@@ -257,6 +257,7 @@ def session_save():
 
         return {
             "status": "success",
+            "logged_in": frappe.session.user != "Guest",
             "data": session_data
         }
 

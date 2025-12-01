@@ -3,34 +3,17 @@
 {% block content %}
 <section id="cover">
     <div class="container">
-        <div class="quote-header"><h2>My Bookings</h2></div>
+        <div class="quote-header"><h2>My Shipments</h2></div>
     </div>
     <div class="container">
-
-        <!-- Shipper Address -->
         <div class="row">
+            
+            {% include "click2ship_core/templates/includes/dashboard_left_nav.html" %}
 
-            <!-- Delivery Address -->
-            <div class="col-md-3">
-                <div class="payment-options-section left-navaigation-section">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item ">
-                            <a href="shipments" class="nav-link "><i class="mdi mdi-truck-fast"></i> Shipments</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="trackings"><i class="mdi mdi-map-marker"></i> Trackings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="orders"><i class="mdi mdi-package-variant"></i> Orders</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
             <div class="col-md-9">
                 {% if bookings %}
                     {% for b in bookings %}
                     <div class="shipper-section">
-                        <!-- Quote Summary -->
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="quote-wrapper">
@@ -44,9 +27,7 @@
                                             <div class="quote-item-desc">{{ b.creation }}</div>
                                         </div>
                                         <div class="flex-150">
-                                            <div class="nav-item nav-btn -outlined">
-                                                <a class="nav-btn-link book-now-btn" href="{{ b.file_url }}" target="_blank">Download</a>
-                                            </div>
+                                            <button onclick="window.open('{{ b.file_url }}', '_blank')" class="nav-btn -outlined">Download</button>
                                         </div>
                                     </div>
                                 </div>
@@ -61,5 +42,4 @@
         </div>
     </div>
 </section>
-
 {% endblock %}

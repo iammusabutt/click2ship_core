@@ -335,12 +335,12 @@ document.addEventListener("DOMContentLoaded", function() {
                                     </div>
                                 </div>
                                 <div class="col-md-2 d-flex align-items-center">
-                                    <button type="button" class="btn btn-outline-danger w-100 remove-line">Remove</button>
+                                    <button type="button" class="nav-btn -outlined remove-line">Remove</button>
                                 </div>
                             </div>
                         </div>
             
-                        <button type="button" id="add-line" class="btn btn-outline-primary mt-2">
+                        <button type="button" id="add-line" class="nav-btn -outlined">
                             + Add another item line
                         </button>
                         
@@ -375,7 +375,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             • I confirm I've read and agree to the specific terms of Parcelforce which can be found in the following 2 links. <a href="#" target="_blank">Compensation Exclusions</a> and <a href="#" target="_blank">Prohibitions and Restrictions Guide</a>.
                         </label>
                         <div class="text-center mt-4">
-                            <button id="generatePayloadBtn" class="btn btn-lg btn-red">Add to Basket</button>
+                            <button id="generatePayloadBtn" class="nav-btn -outlined">Add to Basket</button>
                         </div>
                     </div>
                 </div>
@@ -837,9 +837,11 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
     .then(res => res.json())
     .then(r => {
         if (r.message && r.message.status === "success") {
-            //if (r.message.logged_in) window.location.href = "/cart";
-            //else window.location.href = "/identity";
-            window.location.href = "/cart";
+            if (r.message.logged_in) {
+                window.location.href = "/cart";
+            } else {
+                window.location.href = "/identity";
+            }
         } else {
             alert("Failed to store booking cache");
         }

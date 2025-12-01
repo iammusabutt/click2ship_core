@@ -4,9 +4,14 @@ def get_context(context):
     # Fetch bookings created by current session user
     user = frappe.session.user
 
+    if user == "Guest":
+        # Redirect guest users to login page
+        frappe.local.flags.redirect_location = "/signin"
+        raise frappe.Redirect
+
     bookings = frappe.get_all(
         "Shipment Booking",
-        filters={"owner": user},   # or {"owner_user": user} if you made a custom field
+        filters={"owner": user},
         fields=["name", "shipment_barcode", "creation"],
         order_by="creation desc"
     )
