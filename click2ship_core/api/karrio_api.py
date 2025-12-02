@@ -3,6 +3,7 @@ import frappe
 from frappe import _
 from frappe.utils import now_datetime, get_datetime, cstr
 import json
+import base64
 KARRIO_BASE_URL = "https://api.click2ship.net"
 
 #KARRIO_BASE_URL = "https://noninterpretational-madelene-geminally.ngrok-free.dev"
@@ -260,10 +261,8 @@ def shipment():
             "x-test-mode": "true"
         }
 
-        # Prepare the shipment data (this should be replaced with actual data)
-        shipment_data = {
-            # Populate with actual shipment details
-        }
+        # Get data from the request
+        shipment_data = frappe.request.get_json()
 
         response = requests.post(url, json=shipment_data, headers=headers, timeout=15)
 
@@ -307,3 +306,4 @@ def shipment():
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Unexpected Error in Shipment Booking")
+        frappe.throw(f"An unexpected error occurred during shipment booking: {str(e)}")
