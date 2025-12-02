@@ -25,7 +25,7 @@
                     const trackBtn = document.getElementById("track-btn");
                     const trackingNumberInput = document.getElementById("tracking-number");
                     const trackingResults = document.getElementById("tracking-results");
-                    const csrfToken = "{{ csrf_token }}";
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                     trackBtn.addEventListener("click", function () {
                         const trackingNumber = trackingNumberInput.value.trim();
@@ -43,7 +43,8 @@
                                 "X-Frappe-CSRF-Token": csrfToken
                             },
                             body: JSON.stringify({
-                                tracking_number: trackingNumber
+                                tracking_number: trackingNumber,
+                                carrier_name: "usps" 
                             })
                         })
                         .then(res => res.json())
