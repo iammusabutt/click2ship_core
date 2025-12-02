@@ -25,6 +25,7 @@
                     const trackBtn = document.getElementById("track-btn");
                     const trackingNumberInput = document.getElementById("tracking-number");
                     const trackingResults = document.getElementById("tracking-results");
+                    const csrfToken = "{{ csrf_token }}";
 
                     trackBtn.addEventListener("click", function () {
                         const trackingNumber = trackingNumberInput.value.trim();
@@ -35,35 +36,44 @@
 
                         trackingResults.innerHTML = "Loading...";
 
-                        frappe.call({
-                            method: "click2ship_core.api.call.track_shipment",
-                            args: {
-                                tracking_number: trackingNumber
+                        fetch("/api/method/click2ship_core.api.call.track_shipment", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-Frappe-CSRF-Token": csrfToken
                             },
-                            callback: function (r) {
-                                if (r.message) {
-                                    const data = r.message;
-                                    if (data.tracking_status) {
-                                        let html = `<h4>Tracking Status: ${data.tracking_status}</h4>`;
-                                        if (data.events && data.events.length > 0) {
-                                            html += '<ul class="list-group">';
-                                            data.events.forEach(event => {
-                                                html += `<li class="list-group-item">
-                                                    <strong>${event.date} at ${event.time}</strong><br>
-                                                    ${event.description}<br>
-                                                    <em>${event.location}</em>
-                                                </li>`;
-                                            });
-                                            html += '</ul>';
-                                        }
-                                        trackingResults.innerHTML = html;
-                                    } else {
-                                        trackingResults.innerHTML = `<div class="alert alert-danger">${data.error || "Could not retrieve tracking information."}</div>`;
+                            body: JSON.stringify({
+                                tracking_number: trackingNumber
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(r => {
+                            if (r.message) {
+                                const data = r.message;
+                                if (data.tracking_status) {
+                                    let html = `<h4>Tracking Status: ${data.tracking_status}</h4>`;
+                                    if (data.events && data.events.length > 0) {
+                                        html += '<ul class="list-group">';
+                                        data.events.forEach(event => {
+                                            html += `<li class="list-group-item">
+                                                <strong>${event.date} at ${event.time}</strong><br>
+                                                ${event.description}<br>
+                                                <em>${event.location}</em>
+                                            </li>`;
+                                        });
+                                        html += '</ul>';
                                     }
+                                    trackingResults.innerHTML = html;
                                 } else {
-                                    trackingResults.innerHTML = '<div class="alert alert-danger">An error occurred.</div>';
+                                    trackingResults.innerHTML = `<div class="alert alert-danger">${data.error || "Could not retrieve tracking information."}</div>`;
                                 }
+                            } else {
+                                trackingResults.innerHTML = '<div class="alert alert-danger">An error occurred.</div>';
                             }
+                        })
+                        .catch(err => {
+                            console.error("Error tracking shipment:", err);
+                            trackingResults.innerHTML = '<div class="alert alert-danger">An error occurred.</div>';
                         });
                     });
                 });

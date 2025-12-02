@@ -335,11 +335,16 @@ def book():
         frappe.log_error(frappe.get_traceback(), "Booking Router Error")
         raise e
 @frappe.whitelist(allow_guest=True)
-def track_shipment(tracking_number):
+def track_shipment():
     """
     Track a shipment using Karrio API.
     """
     try:
+        data = frappe.request.get_json()
+        tracking_number = data.get("tracking_number")
+        if not tracking_number:
+            return {"error": "Tracking number not provided."}
+
         # For now, we assume the carrier is Karrio.
         # In the future, we can add logic to determine the carrier from the tracking number.
         
