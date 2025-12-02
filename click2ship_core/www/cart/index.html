@@ -6,27 +6,7 @@
         <div class="quote-header"><h2>Book Your Delivery</h2></div>
     </div>
     <div class="container">
-<div id="cached-bookings"></div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    fetch("/api/method/click2ship_core.api.call.session_data")
-        .then(res => res.json())
-        .then(result => {
-            const container = document.getElementById("cached-bookings");
-
-            if(result.message){
-                const data = result.message;
-                if(Object.keys(data).length === 0){
-                    container.innerHTML = "<p>No booking data in cache.</p>";
-                } else {
-                    container.innerHTML = "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
-                }
-            }
-        })
-        .catch(err => console.error("Error fetching cached booking:", err));
-});
-</script>
 
 
         <!-- Shipper Address -->
@@ -170,7 +150,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("Shipment booked:", r);
             alert("Shipment booked successfully!");
             // Redirect or show barcode
-            // window.location.href = "/label"; 
+            window.location.href = "/label"; 
         })
         .catch(err => {
             console.error("Error booking shipment:", err);
