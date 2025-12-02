@@ -334,3 +334,44 @@ def book():
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Booking Router Error")
         raise e
+@frappe.whitelist(allow_guest=True)
+def track_shipment(tracking_number):
+    """
+    Track a shipment using Karrio API.
+    """
+    try:
+        # For now, we assume the carrier is Karrio.
+        # In the future, we can add logic to determine the carrier from the tracking number.
+        
+        # Get the access token
+        access_token = frappe.call("click2ship_core.api.karrio_api._get_valid_token")
+        
+        url = f"https://api.click2ship.net/v1/proxy/tracking/{tracking_number}"
+        
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "x-test-mode": "true"
+        }
+
+        response = requests.get(url, headers=headers, timeout=15)
+
+        if response.status_code not in [200, 201]:
+            return {"error": f"Shipment Tracking API Error {response.status_code}: {response.text}"}
+
+        # Parse the response JSON
+        resp_json = response.json()
+        
+        # Normalize the response
+        if resp_json.get("tracking_status"):
+            return {
+                "tracking_status": resp_json.get("tracking_status"),
+                "events": resp_json.get("events")
+            }
+        else:
+            return {"error": "Invalid tracking response from carrier."}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "track_shipment API Error")
+        return {"error": f"An unexpected error occurred: {str(e)}"}
