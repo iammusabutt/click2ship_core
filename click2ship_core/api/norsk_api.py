@@ -136,6 +136,57 @@ def get_booking_details_from_cache():
 def get_session_data():
     return dict(frappe.session.data)
 
+def store_shipment_details(doc, session_data):
+    booking_details = session_data.get("booking", {})
+
+    # Map shipper details
+    shipper = booking_details.get("Shipper", {})
+    doc.shipper_name = shipper.get("ContactName")
+    doc.shipper_company = shipper.get("CompanyName")
+    doc.country_code = shipper.get("CountryCode")
+    doc.shipper_address1 = shipper.get("Address1")
+    doc.shipper_address2 = shipper.get("Address2")
+    doc.shipper_address3 = shipper.get("Address3")
+    doc.shipper_city = shipper.get("City")
+    doc.shipper_state = shipper.get("State")
+    doc.shipper_postal_code = shipper.get("Zipcode")
+    doc.shipper_phone_number = shipper.get("PhoneNumber")
+    doc.shipper_email = shipper.get("Email")
+    doc.shipper_fax = shipper.get("Fax")
+
+    # Map receiver details
+    receiver = booking_details.get("Consignee", {})
+    doc.receiver_name = receiver.get("ContactName")
+    doc.receiver_company = receiver.get("CompanyName")
+    doc.receiver_country = receiver.get("CountryCode")
+    doc.receiver_address1 = receiver.get("Address1")
+    doc.receiver_address2 = receiver.get("Address2")
+    doc.receiver_address3 = receiver.get("Address3")
+    doc.receiver_city = receiver.get("City")
+    doc.receiver_state = receiver.get("State")
+    doc.receiver_postal_code = receiver.get("Zipcode")
+    doc.receiver_phone_number = receiver.get("PhoneNumber")
+    doc.receiver_email = receiver.get("Email")
+    doc.receiver_fax = receiver.get("Fax")
+
+    # Map products to child table
+    doc.set("items", [])  # Clear existing items
+    if booking_details.get("Pieces"):
+        for piece in booking_details.get("Pieces"):
+            for product in piece.get("Products", []):
+                doc.append("items", {
+                    "item_name": product.get("ProductDescription"),
+                    "item_description": product.get("ProductDescription"),
+                    "item_quantity": product.get("ProductQuantity"),
+                    "item_value": product.get("ProductUnitValue"),
+                    "item_weight": product.get("ProductUnitWeight"),
+                    "item_currency": product.get("Currency"),
+                    "item_country_of_manufacture": product.get("CountryOfManufacture"),
+                    "item_hscode": product.get("HSCode")
+                })
+
+    return doc
+
 # -------------------------------------------------------------
 # Book shipment and store Norsk response
 # -------------------------------------------------------------
@@ -185,8 +236,10 @@ def book_norsk_shipment():
 
         # API JSON Response
         resp_json = response.json()
-        #frappe.throw(f"RESPONSE: {json.dumps(barcode, indent=2)}")
-        #return
+        
+        # Get session data
+        session_key = frappe.session.sid
+        session_data = frappe.cache().get_value(f"session_data:{session_key}") or {}
 
         # Extract fields
         barcode = resp_json.get("Barcode", {})
@@ -194,6 +247,7 @@ def book_norsk_shipment():
 
         # Store into ERPNext Doctype
         doc = frappe.new_doc("Shipment Booking")
+        doc = store_shipment_details(doc, session_data)
         doc.shipment_barcode = resp_json.get("Barcode", {})
         doc.user = frappe.session.user
         doc.insert(ignore_permissions=True)

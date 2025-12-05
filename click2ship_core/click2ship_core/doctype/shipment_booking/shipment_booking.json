@@ -7,6 +7,14 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "section_break_cvzg",
+  "shipment_barcode",
+  "booking_type",
+  "user",
+  "column_break_gmwf",
+  "shipment_booked_with",
+  "shipping_service_name",
+  "shipping_service_code",
   "section_break_edqe",
   "shipper",
   "shipper_name",
@@ -35,9 +43,17 @@
   "receiver_phone_number",
   "receiver_email",
   "receiver_fax",
-  "section_break_cvzg",
-  "shipment_barcode",
-  "user"
+  "items_being_shipped_section",
+  "items",
+  "financial_details_section",
+  "base_cost",
+  "total_cost_without_additional_cost",
+  "grand_total_including_additional_cost",
+  "column_break_fgof",
+  "air_freight_cost",
+  "local_processing_cost",
+  "local_custom_charges",
+  "transhipping_clearance"
  ],
  "fields": [
   {
@@ -47,7 +63,8 @@
   },
   {
    "fieldname": "section_break_cvzg",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Booking Details"
   },
   {
    "fieldname": "shipment_barcode",
@@ -64,7 +81,8 @@
   },
   {
    "fieldname": "section_break_edqe",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Shipper & Receiver Address"
   },
   {
    "fieldname": "shipper",
@@ -199,11 +217,104 @@
    "fieldname": "receiver_fax",
    "fieldtype": "Data",
    "label": "Fax"
+  },
+  {
+   "fieldname": "items_being_shipped_section",
+   "fieldtype": "Section Break",
+   "label": "Items Being Shipped"
+  },
+  {
+   "fieldname": "column_break_gmwf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipment_booked_with",
+   "fieldtype": "Data",
+   "label": "Shipment Booked With"
+  },
+  {
+   "fieldname": "booking_type",
+   "fieldtype": "Data",
+   "label": "Booking Type"
+  },
+  {
+   "fieldname": "shipping_service_name",
+   "fieldtype": "Data",
+   "label": "Shipping Service Name"
+  },
+  {
+   "fieldname": "shipping_service_code",
+   "fieldtype": "Data",
+   "label": "Shipping Service Code"
+  },
+  {
+   "fieldname": "financial_details_section",
+   "fieldtype": "Section Break",
+   "label": "Financial Details"
+  },
+  {
+   "fieldname": "base_cost",
+   "fieldtype": "Data",
+   "label": "Base Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_cost_without_additional_cost",
+   "fieldtype": "Data",
+   "label": "Total Cost (Without Additional Cost)",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total_including_additional_cost",
+   "fieldtype": "Data",
+   "label": "Grand Total (Including Additional Cost)",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fgof",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "air_freight_cost",
+   "fieldtype": "Data",
+   "label": "Air Freight Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "local_processing_cost",
+   "fieldtype": "Data",
+   "label": "Local Processing Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "local_custom_charges",
+   "fieldtype": "Data",
+   "label": "Local Custom Charges",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "transhipping_clearance",
+   "fieldtype": "Data",
+   "label": "Transhipping Clearance",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Shipped Items"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-27 19:37:13.536905",
+ "modified": "2025-12-05 23:19:10.448543",
  "modified_by": "Administrator",
  "module": "Click2Ship Core",
  "name": "Shipment Booking",
