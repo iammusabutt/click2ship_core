@@ -334,49 +334,80 @@ def book():
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Booking Router Error")
         raise e
+        
+
 @frappe.whitelist(allow_guest=True)
-def track_shipment():
+def tracking():
     """
-    Track a shipment using Karrio API.
+    Track a shipment using Karrio API via a POST request with a JSON body.
     """
     try:
         data = frappe.request.get_json()
         tracking_number = data.get("tracking_number")
-        if not tracking_number:
-            return {"error": "Tracking number not provided."}
+        carrier_name = data.get("carrier_name")
 
-        # For now, we assume the carrier is Karrio.
-        # In the future, we can add logic to determine the carrier from the tracking number.
+        if not tracking_number or not carrier_name:
+            # Using frappe.throw is generally better for signaling API input errors than returning an error dictionary
+            frappe.throw("Both 'tracking_number' and 'carrier_name' are required.", frappe.ValidationError)
         
-        # Get the access token
+        # --- 1. API Configuration ---
+        KARRIO_TRACKING_URL = "https://api.click2ship.net/v1/proxy/tracking"
+
+        # Securely retrieve the access token
         access_token = frappe.call("click2ship_core.api.karrio_api._get_valid_token")
         
-        url = f"https://api.click2ship.net/v1/proxy/tracking/{tracking_number}"
-        
+        # --- 2. Construct Headers ---
         headers = {
-            "Authorization": f"Bearer {access_token}",
+            "Authorization": f"Bearer {access_token}", 
             "Content-Type": "application/json",
             "Accept": "application/json",
             "x-test-mode": "true"
         }
 
-        response = requests.get(url, headers=headers, timeout=15)
+        # --- 3. Construct Request Body (Payload for POST) ---
+        payload = {
+            "tracking_number": tracking_number,
+            "carrier_name": carrier_name.lower()
+        }
 
-        if response.status_code not in [200, 201]:
-            return {"error": f"Shipment Tracking API Error {response.status_code}: {response.text}"}
+        # --- 4. Make the POST Request ---
+        response = requests.post(
+            KARRIO_TRACKING_URL, 
+            headers=headers, 
+            json=payload, # Sends the payload as a JSON body
+            timeout=15
+        )
 
-        # Parse the response JSON
+        # --- 5. Error Handling and Response Normalization ---
+        if response.status_code != 200:
+            frappe.throw(
+                f"Shipment Tracking API Error {response.status_code}: {response.text}",
+                exc=frappe.exceptions.ValidationError 
+            )
+
         resp_json = response.json()
         
-        # Normalize the response
-        if resp_json.get("tracking_status"):
+        # Normalize the response structure
+        if isinstance(resp_json, list) and resp_json and resp_json[0].get("tracking_status"):
+            first_result = resp_json[0]
             return {
+                "tracking_status": first_result.get("tracking_status"),
+                "events": first_result.get("events"),
+                "raw_response": first_result
+            }
+        elif resp_json.get("tracking_status"):
+             return {
                 "tracking_status": resp_json.get("tracking_status"),
-                "events": resp_json.get("events")
+                "events": resp_json.get("events"),
+                "raw_response": resp_json
             }
         else:
-            return {"error": "Invalid tracking response from carrier."}
+            return {"error": "Invalid or unexpected tracking response structure from Karrio."}
 
+    except requests.exceptions.RequestException as e:
+        frappe.log_error(f"Network Error: {str(e)}", "track_shipment Karrio API")
+        return {"error": f"Network error during API call: {str(e)}"}
+    
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "track_shipment API Error")
-        return {"error": f"An unexpected error occurred: {str(e)}"}
+        return {"error": f"An unexpected internal error occurred: {str(e)}"}

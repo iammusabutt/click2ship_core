@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         ${q.Costs?.[1] ? `<div class="quote-item-desc">${q.Costs[1].Reference}</div>` : ""}
                     </div>
                     <div class="flex-100">
-                        <div class="quote-item-title">${currencySymbol}${q.TotalCost.toFixed(2)}</div>
+                        <div class="quote-item-title">${currencySymbol}${q.AdjustedTotalCost.toFixed(2)}</div>
                         <div class="quote-item-desc">inclusive of VAT</div>
                     </div>
                     <div class="flex-200">

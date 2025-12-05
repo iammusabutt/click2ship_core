@@ -36,7 +36,7 @@
 
                         trackingResults.innerHTML = "Loading...";
 
-                        fetch("/api/method/click2ship_core.api.call.track_shipment", {
+                        fetch("/api/method/click2ship_core.api.call.tracking", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -44,7 +44,7 @@
                             },
                             body: JSON.stringify({
                                 tracking_number: trackingNumber,
-                                carrier_name: "usps" 
+                                carrier_name: "UPS" 
                             })
                         })
                         .then(res => res.json())

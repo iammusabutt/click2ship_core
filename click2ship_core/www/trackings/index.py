@@ -1,5 +1,5 @@
 import frappe
 
 def get_context(context):
-    # Add any context data needed for the trackings page here
+    context.csrf_token = frappe.sessions.get_csrf_token()
     return context

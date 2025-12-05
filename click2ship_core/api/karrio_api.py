@@ -252,7 +252,7 @@ def shipment():
     try:
         # Get the access token
         access_token = _get_valid_token()
-        url = f"{KARRIO_BASE_URL}/v1/proxy/shipments"
+        url = f"{KARRIO_BASE_URL}/v1/shipments"
         
         headers = {
             "Authorization": f"Bearer {access_token}",

@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             <div class="quote-item-desc">Adult Signature Required</div>
                         </div>
                         <div class="flex-100">
-                            <div class="quote-item-title">£{{ "{:.2f}".format(selected_quote.quote.TotalCost) }}</div>
+                            <div class="quote-item-title">${{ "{:.2f}".format(selected_quote.quote.TotalCost) }}</div>
                             <div class="quote-item-desc">inclusive of VAT</div>
                         </div>
                         <div class="flex-150">
@@ -644,9 +644,9 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
             PackageDetails: {
                 GoodsDescription: additionalData.PackageContents,
                 CustomValue: parseFloat(document.getElementById('grand-total').textContent) || 0,
-                CustomCurrencyCode: "GBP",
+                CustomCurrencyCode: "USD",
                 InsuranceValue: "0.00",
-                InsuranceCurrencyCode: "GBP",
+                InsuranceCurrencyCode: "USD",
                 ShipmentTerm: "",
                 GoodsOriginCountryCode: shipperData.CountryCode,
                 DeliveryInstructions: additionalData.CourierNotes,
@@ -686,7 +686,7 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
                             Weight: product.ProductUnitWeight * product.ProductQuantity,
                             ManufactureCountryCode: product.CountryOfManufacture,
                             OriginCountryCode: shipperData.CountryCode,
-                            CurrencyCode: "GBP",
+                            CurrencyCode: "USD",
                             CustomsValue: product.ProductUnitValue
                         }]
                     };

@@ -31,7 +31,7 @@ app_license = "mit"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/click2ship_core/css/click2ship_core.css"
 # app_include_js = "/assets/click2ship_core/js/click2ship_core.js"
-app_include_js = "/assets/click2ship_core/js/quotes.js"
+app_include_js = ["/assets/click2ship_core/js/quotes.js"]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/click2ship_core/css/click2ship_core.css"
