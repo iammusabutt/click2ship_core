@@ -2,6 +2,27 @@
 
 {% block content %}
     <div class="container">
+<div id="cached-bookings"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    fetch("/api/method/click2ship_core.api.call.session_data")
+        .then(res => res.json())
+        .then(result => {
+            const container = document.getElementById("cached-bookings");
+
+            if(result.message){
+                const data = result.message;
+                if(Object.keys(data).length === 0){
+                    container.innerHTML = "<p>No booking data in cache.</p>";
+                } else {
+                    container.innerHTML = "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
+                }
+            }
+        })
+        .catch(err => console.error("Error fetching cached booking:", err));
+});
+</script>
 
         <div class="quote-header"><h2>Book Your Delivery</h2></div>
     </div>
@@ -9,30 +30,9 @@
         <!-- Quote Summary -->
         <div class="row">
             <div class="col-md-12">
-                <div class="quote-wrapper">
-                    <div class="quote-item">
-                        <div class="flex-100">
-                            <img src="/assets/click2ship_core/courier_logos/C2S.png"
-                                 alt="Service Logo"
-                                 style="max-height: 60px;"
-                                 onerror="this.onerror=null; this.src='/assets/click2ship_core/courier_logos/{{ selected_quote.quote.ServiceCode }}.png';">
-                        </div>
-                        <div class="flex-200">
-                            <div class="quote-item-title">{{ selected_quote.quote.ServiceName }}</div>
-                            <div class="quote-item-desc">Adult Signature Required</div>
-                        </div>
-                        <div class="flex-100">
-                            <div class="quote-item-title">${{ "{:.2f}".format(selected_quote.quote.TotalCost) }}</div>
-                            <div class="quote-item-desc">inclusive of VAT</div>
-                        </div>
-                        <div class="flex-150">
-                            <div class="quote-item-desc text-red">
-                                Delivery expected by<br>{{ selected_quote.quote.PrettyTransitTime }} ({{ selected_quote.quote.TransitTime }})
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                    <div class="quote-wrapper">
+                                        <div id="dynamic-quote-item"></div>
+                                    </div>            </div>
         </div>
 
         <!-- Shipper Address -->
@@ -449,6 +449,48 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 const selected_quote = {{ selected_quote | tojson }};
 
+// Function to render the quote item
+function renderQuoteItem(quote) {
+    if (!quote || !quote.quote) {
+        return "<p>No quote selected.</p>";
+    }
+
+    const q = quote.quote;
+    const AdjustedTotalCost = parseFloat(q.AdjustedTotalCost).toFixed(2);
+
+    return `
+        <div class="quote-item">
+            <div class="flex-100">
+                <img src="/assets/click2ship_core/courier_logos/C2S.png"
+                     alt="Service Logo"
+                     style="max-height: 60px;"
+                     onerror="this.onerror=null; this.src='/assets/click2ship_core/courier_logos/${q.ServiceCode}.png';">
+            </div>
+            <div class="flex-200">
+                <div class="quote-item-title">${q.ServiceName}</div>
+                <div class="quote-item-desc">Adult Signature Required</div>
+            </div>
+            <div class="flex-100">
+                <div class="quote-item-title">$${AdjustedTotalCost}</div>
+                <div class="quote-item-desc">inclusive of VAT</div>
+            </div>
+            <div class="flex-150">
+                <div class="quote-item-desc text-red">
+                    Delivery expected by<br>${q.PrettyTransitTime} (${q.TransitTime})
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Render the quote item on page load
+document.addEventListener("DOMContentLoaded", function() {
+    const dynamicQuoteItemContainer = document.getElementById("dynamic-quote-item");
+    if (dynamicQuoteItemContainer) {
+        dynamicQuoteItemContainer.innerHTML = renderQuoteItem(selected_quote);
+    }
+});
+
 // Helper: Basic form validation
 function validateFormData(data, requiredFields) {
     let missing = [];
@@ -653,7 +695,7 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
                         ItemCubicWeight: 0,
                         ItemDescription: product.ProductDescription,
                         ItemCustomValue: product.ProductUnitValue,
-                        ItemCustomCurrencyCode: "GBP",
+                        ItemCustomCurrencyCode: "USD",
                         Notes: "",
                         Pieces: [{
                             HarmonisedCode: product.HSCode,
@@ -730,7 +772,7 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
                 sku: product.sku || "",
                 hs_code: product.HSCode,
                 value_amount: product.ProductUnitValue,
-                value_currency: "GBP",
+                value_currency: "USD",
                 origin_country: shipperData.CountryCode
             };
         });
@@ -753,13 +795,13 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
             }],
             payment: {
                 paid_by: "sender",
-                currency: "GBP"
+                currency: "USD"
             },
             customs: {
                 commodities: parcelItems,
                 duty: {
                     paid_by: "sender",
-                    currency: "GBP",
+                    currency: "USD",
                     declared_value: parseFloat(document.getElementById('grand-total').textContent) || 0,
                 },
                 incoterm: "DDU", // Delivered Duty Unpaid
