@@ -1,4 +1,7 @@
 import frappe, random, string
+from frappe.website.utils import is_signup_disabled
+from frappe import _
+from frappe.utils import escape_html
 
 @frappe.whitelist(allow_guest=True)
 def guest_checkout(**kwargs):
@@ -25,7 +28,7 @@ def guest_checkout(**kwargs):
     user = frappe.get_doc({
         "doctype": "User",
         "email": email,
-        "first_name": "Guest",
+        "first_name": escape_html("Guest"), # Added escape_html
         "send_welcome_email": 0,
         "enabled": 1,
         "user_type": "Website User",
@@ -45,29 +48,63 @@ def guest_checkout(**kwargs):
     return {"message": "Logged In", "user": email}
 
 
-@frappe.whitelist(allow_guest=True)
-def signup(email, first_name, last_name, password):
-    frappe.local.no_csrf = True  
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+def signup(email, first_name, last_name, password, redirect_to=None):
+    frappe.local.no_csrf = True
+
+    if is_signup_disabled():
+        frappe.throw(_("Sign Up is disabled"), title=_("Not Allowed"))
 
     if not email or not password:
-        frappe.throw("Email and password are required")
+        frappe.throw(_("Email and password are required"))
 
-    if frappe.db.exists("User", email):
-        return {"message": "User already exists. Please log in."}
+    user_exists = frappe.db.get("User", {"email": email})
+    if user_exists:
+        if user_exists.enabled:
+            return {"status": "error", "message": _("Already Registered")}
+        else:
+            return {"status": "error", "message": _("Registered but disabled")}
+
+    if frappe.db.get_creation_count("User", 60) > 300: # Rate limiting
+        frappe.respond_as_web_page(
+            _("Temporarily Disabled"),
+            _(
+                "Too many users signed up recently, so the registration is disabled. Please try back in an hour"
+            ),
+            http_status_code=429,
+        )
+        return {"status": "error", "message": _("Temporarily Disabled")} # Added return for consistency
 
     user = frappe.get_doc({
         "doctype": "User",
         "email": email,
-        "first_name": first_name,
-        "last_name": last_name,
+        "first_name": escape_html(first_name),
+        "last_name": escape_html(last_name),
         "enabled": 1,
         "user_type": "Website User",
         "new_password": password,
-        "send_welcome_email": 0
+        "send_welcome_email": 0 # Keep this as 0 for direct password signup
     })
-    user.insert(ignore_permissions=True)
+    user.flags.ignore_permissions = True
+    user.flags.ignore_password_policy = True
+    user.insert()
 
-    return {"message": "Account created successfully"}
+    # set default signup role as per Portal Settings
+    default_role = frappe.get_single_value("Portal Settings", "default_role")
+    if default_role:
+        user.add_roles(default_role)
+
+    if redirect_to:
+        frappe.cache.hset("redirect_after_login", user.name, redirect_to)
+
+    # Directly log in the user after successful signup
+    try:
+        frappe.local.login_manager.authenticate(user=email, pwd=password)
+        frappe.local.login_manager.post_login()
+        return {"status": "success", "message": _("Account created successfully and logged in.")}
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Signup: Auto-login failed")
+        return {"status": "error", "message": _("Account created, but automatic login failed: {0}").format(e)}
 
 @frappe.whitelist()
 def set_password(new_password):

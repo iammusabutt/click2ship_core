@@ -11,11 +11,45 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function (event) {
             event.preventDefault();
 
-            const destinationCountry = document.getElementById("destinationCountry").value;
-            const boxlength = parseFloat(document.getElementById("c-length").value);
-            const boxwidth = parseFloat(document.getElementById("c-width").value);
-            const boxheight = parseFloat(document.getElementById("c-height").value);
-            const boxweight = parseFloat(document.getElementById("c-weight").value);
+            const destinationCountryInput = document.getElementById("destinationCountry");
+            const lengthInput = document.getElementById("c-length");
+            const widthInput = document.getElementById("c-width");
+            const heightInput = document.getElementById("c-height");
+            const weightInput = document.getElementById("c-weight");
+
+            // Reset validation
+            destinationCountryInput.classList.remove('is-invalid');
+            lengthInput.classList.remove('is-invalid');
+            widthInput.classList.remove('is-invalid');
+            heightInput.classList.remove('is-invalid');
+            weightInput.classList.remove('is-invalid');
+
+            const destinationCountry = destinationCountryInput.value;
+            const boxlength = parseFloat(lengthInput.value);
+            const boxwidth = parseFloat(widthInput.value);
+            const boxheight = parseFloat(heightInput.value);
+            const boxweight = parseFloat(weightInput.value);
+
+            if (destinationCountry === "") {
+                destinationCountryInput.classList.add('is-invalid');
+                return;
+            }
+            if (isNaN(boxlength) || boxlength <= 0) {
+                lengthInput.classList.add('is-invalid');
+                return;
+            }
+            if (isNaN(boxwidth) || boxwidth <= 0) {
+                widthInput.classList.add('is-invalid');
+                return;
+            }
+            if (isNaN(boxheight) || boxheight <= 0) {
+                heightInput.classList.add('is-invalid');
+                return;
+            }
+            if (isNaN(boxweight) || boxweight <= 0) {
+                weightInput.classList.add('is-invalid');
+                return;
+            }
 
             // Store in sessionStorage
             sessionStorage.setItem("quote_request", JSON.stringify({
@@ -328,7 +362,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                 <label class="form-label">Length</label>
             
                                                 <div class="input-group">
-                                                    <input name="length" id="c-length" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01" required>
+                                                    <input name="length" id="c-length" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01">
                                                     <div class="input-group-text">
                                                         cm
                                                     </div>
@@ -340,7 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                 <label class="form-label">Width</label>
             
                                                 <div class="input-group">
-                                                    <input name="width" id="c-width" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01" required>
+                                                    <input name="width" id="c-width" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01">
                                                     <div class="input-group-text">
                                                         cm
                                                     </div>
@@ -356,7 +390,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                 <label class="form-label">Height</label>
             
                                                 <div class="input-group">
-                                                    <input name="height" id="c-height" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01" required>
+                                                    <input name="height" id="c-height" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01">
                                                     <div class="input-group-text">
                                                         cm
                                                     </div>
@@ -368,7 +402,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                 <label class="form-label">Weight</label>
             
                                                 <div class="input-group">
-                                                    <input name="weight" id="c-weight" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01" required>
+                                                    <input name="weight" id="c-weight" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01">
                                                     <div class="input-group-text">
                                                         Kg
                                                     </div>

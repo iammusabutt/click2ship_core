@@ -562,7 +562,7 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
             Products: [
                 {
                     ProductDescription: desc || "No description available",
-                    CountryOfManufacture: additionalData.CustomsCountryOfManufacture || "AU",
+                    CountryOfManufacture: additionalData.CustomsCountryOfManufacture,
                     HSCode: "00000000" || "00000000",
                     ProductUnitValue: value,
                     Currency: "USD",

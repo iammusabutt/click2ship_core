@@ -120,11 +120,11 @@
                             <a class="nav-btn-link" href="/dashboard">My Account</a>
                         </li>
                         <li class="nav-item nav-btn">
-                            <a class="nav-btn-link" href="/api/method/logout">Logout</a>
+                            <a class="nav-btn-link" href="#" id="logout-link">Logout</a>
                         </li>
                     {% else %}
                         <li class="nav-item nav-btn -outlined">
-                            <a class="nav-btn-link" href="/signup">Sign Up</a>
+                            <a class="nav-btn-link" href="#" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</a>
                         </li>
                         <li class="nav-item nav-btn">
                             <a class="nav-btn-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
@@ -149,13 +149,13 @@
                     <form id="login-form">
                         <div class="form-group mb-4">
                             <div class="form-floating">
-                                <input type="email" class="form-control" id="login-email" placeholder="Email address" required>
+                                <input type="email" class="form-control" id="login-email" placeholder="Email address">
                                 <label for="login-email">Email address</label>
                             </div>
                         </div>
                         <div class="form-group mb-4">
                             <div class="form-floating">
-                                <input type="password" class="form-control" id="login-password" placeholder="Password" required>
+                                <input type="password" class="form-control" id="login-password" placeholder="Password">
                                 <label for="login-password">Password</label>
                             </div>
                         </div>
@@ -167,18 +167,88 @@
         </div>
     </div>
 
+    <!-- Signup Modal -->
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="signup-form">
+                        <div class="form-group mb-3">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="signup-first-name" placeholder="First Name">
+                                <label for="signup-first-name">First Name</label>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                             <div class="form-floating">
+                                <input type="text" class="form-control" id="signup-last-name" placeholder="Last Name">
+                                <label for="signup-last-name">Last Name</label>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="signup-email" placeholder="Email address">
+                                <label for="signup-email">Email address</label>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="signup-password" placeholder="Password">
+                                <label for="signup-password">Password</label>
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="signup-confirm-password" placeholder="Confirm Password">
+                                <label for="signup-confirm-password">Confirm Password</label>
+                            </div>
+                        </div>
+                        <div id="signup-error" class="text-danger mb-3"></div>
+                        <button type="submit" class="btn btn-red">Sign Up</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            function validateEmail(email) {
+                const re = /\S+@\S+\.\S+/;
+                return re.test(email);
+            }
+
             const loginForm = document.getElementById("login-form");
             if(loginForm) {
                 loginForm.addEventListener("submit", function(event) {
                     event.preventDefault();
-                    const email = document.getElementById("login-email").value;
-                    const password = document.getElementById("login-password").value;
+
+                    const emailInput = document.getElementById("login-email");
+                    const passwordInput = document.getElementById("login-password");
                     const loginError = document.getElementById("login-error");
 
-                    // Clear previous errors
+                    // Reset validation
+                    emailInput.classList.remove('is-invalid');
+                    passwordInput.classList.remove('is-invalid');
                     loginError.textContent = "";
+
+                    const email = emailInput.value.trim();
+                    const password = passwordInput.value.trim();
+
+                    if (email === "" || !validateEmail(email)) {
+                        emailInput.classList.add('is-invalid');
+                        return;
+                    }
+                    if (password === "") {
+                        passwordInput.classList.add('is-invalid');
+                        return;
+                    }
+
+                    loginError.textContent = "Logging in...";
 
                     fetch("/api/method/login", {
                         method: "POST",
@@ -189,16 +259,108 @@
                     })
                     .then(res => res.json())
                     .then(data => {
-                        if (data.message === "Logged In") {
-                            window.location.href = "/dashboard"; // Redirect to dashboard page
+                        const isSuccess = (data.message === "Logged In") || (data.message === "No App");
+
+                        if (isSuccess) {
+                            window.location.href = "/dashboard";
                         } else {
-                            // Frappe login API returns an error message in data.message on failure
-                            loginError.textContent = data.message || "Invalid username or password.";
+                            loginError.textContent = data.message || 'Invalid Login. Try again.';
                         }
                     })
                     .catch(err => {
                         console.error("Login error:", err);
                         loginError.textContent = "An error occurred during login.";
+                    });
+                });
+            }
+
+            const signupForm = document.getElementById("signup-form");
+            if(signupForm) {
+                signupForm.addEventListener("submit", function(event) {
+                    event.preventDefault();
+                    
+                    const firstNameInput = document.getElementById("signup-first-name");
+                    const lastNameInput = document.getElementById("signup-last-name");
+                    const emailInput = document.getElementById("signup-email");
+                    const passwordInput = document.getElementById("signup-password");
+                    const confirmPasswordInput = document.getElementById("signup-confirm-password");
+                    const signupError = document.getElementById("signup-error");
+
+                    // Reset validation
+                    firstNameInput.classList.remove('is-invalid');
+                    lastNameInput.classList.remove('is-invalid');
+                    emailInput.classList.remove('is-invalid');
+                    passwordInput.classList.remove('is-invalid');
+                    confirmPasswordInput.classList.remove('is-invalid');
+                    signupError.textContent = "";
+
+                    const firstName = firstNameInput.value.trim();
+                    const lastName = lastNameInput.value.trim();
+                    const email = emailInput.value.trim();
+                    const password = passwordInput.value.trim();
+                    const confirmPassword = confirmPasswordInput.value.trim();
+
+                    if (firstName === "") {
+                        firstNameInput.classList.add('is-invalid');
+                        return;
+                    }
+                    if (lastName === "") {
+                        lastNameInput.classList.add('is-invalid');
+                        return;
+                    }
+                    if (email === "" || !validateEmail(email)) {
+                        emailInput.classList.add('is-invalid');
+                        return;
+                    }
+                    if (password === "") {
+                        passwordInput.classList.add('is-invalid');
+                        return;
+                    }
+                    if (password !== confirmPassword) {
+                        confirmPasswordInput.classList.add('is-invalid');
+                        return;
+                    }
+                    
+                    signupError.textContent = "Signing up...";
+                    const redirect_to = new URLSearchParams(window.location.search).get("redirect-to");
+
+                    fetch("/api/method/click2ship_core.api.identity_api.signup", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        },
+                        body: JSON.stringify({
+                            first_name: firstName,
+                            last_name: lastName,
+                            email: email,
+                            password: password,
+                            redirect_to: redirect_to
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.message && data.message.status === "success") {
+                            window.location.href = redirect_to || "/dashboard";
+                        } else {
+                            signupError.textContent = data.message.message || "An error occurred during signup.";
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Signup error:", err);
+                        signupError.textContent = "An error occurred during signup.";
+                    });
+                });
+            }
+
+            const logoutLink = document.getElementById("logout-link");
+            if (logoutLink) {
+                logoutLink.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    fetch("/api/method/logout", {
+                        method: "GET"
+                    }).finally(() => {
+                        window.location.href = "/";
                     });
                 });
             }
