@@ -218,28 +218,9 @@ def book_norsk_shipment():
             frappe.throw("Shipment data is missing or invalid.")
 
         settings = get_norsk_settings()
-        date = formatdate(timeval=None, localtime=False, usegmt=True)
         resource = "/api/shipment"
-        content_type = "application/json"
 
-        body_md5 = hashlib.md5(shipment_data).hexdigest()
-        string_to_sign = f"POST\n{body_md5}\n{content_type}\n{date}\n{resource}"
-        signature = base64.b64encode(
-            hmac.new(
-                key=settings['secret_access_key'].encode('utf-8'),
-                msg=string_to_sign.encode('utf-8'),
-                digestmod=hashlib.sha1
-            ).digest()
-        ).decode('utf-8')
-
-        auth_header = f"{settings['access_key']}:{signature}"
-
-        headers = {
-            "Authorization": auth_header,
-            "Date": date,
-            "Accept": "application/json",
-            "Content-Type": content_type
-        }
+        headers = get_auth_headers(shipment_data, resource)
 
         response = requests.post(
             f"{settings['api_url']}shipment",
