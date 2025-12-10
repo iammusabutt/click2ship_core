@@ -157,6 +157,7 @@ def get_session_data():
 
 def store_shipment_details(doc, session_data):
     booking_details = session_data.get("booking", {})
+    quote = session_data.get("quote", {})
 
     # Map shipper details
     shipper = booking_details.get("Shipper", {})
@@ -187,6 +188,21 @@ def store_shipment_details(doc, session_data):
     doc.receiver_phone_number = receiver.get("PhoneNumber")
     doc.receiver_email = receiver.get("Email")
     doc.receiver_fax = receiver.get("Fax")
+
+    # Map financial details
+    doc.base_cost = quote.get("BaseCost")
+    doc.fuel_cost = quote.get("FuelCost")
+    doc.insurance_cost = ""
+    doc.air_freight_cost = quote.get("ExtraCosts", {}).get("AirFreightCost")
+    doc.local_processing_cost = quote.get("ExtraCosts", {}).get("LocalProcessingCost")
+    doc.local_custom_charges = quote.get("ExtraCosts", {}).get("LocalCustomCharges")
+    doc.transhipping_clearance = quote.get("ExtraCosts", {}).get("DestinationTranshippingClearance")
+    doc.total_extra_cost = quote.get("ExtraCosts", {}).get("ExtraTotal")
+    doc.total_cost_without_additional_cost = quote.get("TotalCost")
+    doc.grand_total_including_additional_cost = quote.get("AdjustedTotalCost")
+
+    doc.shipping_service_name = quote.get("ServiceName")
+    doc.shipping_service_code = quote.get("ServiceCode")
 
     # Map products to child table
     doc.set("items", [])  # Clear existing items
@@ -250,6 +266,8 @@ def book_norsk_shipment():
         doc = frappe.new_doc("Shipment Booking")
         doc = store_shipment_details(doc, session_data)
         doc.shipment_barcode = resp_json.get("Barcode", {})
+        doc.shipment_booked_with = "Norsk"
+        doc.booking_type = "Via UK"
         doc.user = frappe.session.user
         doc.insert(ignore_permissions=True)
         
@@ -267,6 +285,8 @@ def book_norsk_shipment():
         return {
             "success": True,
             "shipment_id": doc.name,
+            "shipment_booked_with": "Norsk",
+            "booking_type": "Via UK",
             "barcode": barcode,
             "label_url": file_doc.file_url   # ERPNext file URL
         }

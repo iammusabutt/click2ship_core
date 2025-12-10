@@ -47,13 +47,19 @@
   "items",
   "financial_details_section",
   "base_cost",
-  "total_cost_without_additional_cost",
-  "grand_total_including_additional_cost",
+  "fuel_cost",
+  "insurance_cost",
   "column_break_fgof",
   "air_freight_cost",
   "local_processing_cost",
   "local_custom_charges",
-  "transhipping_clearance"
+  "transhipping_clearance",
+  "total_extra_cost",
+  "section_break_qpwi",
+  "column_break_hlkq",
+  "column_break_jhjd",
+  "total_cost_without_additional_cost",
+  "grand_total_including_additional_cost"
  ],
  "fields": [
   {
@@ -310,11 +316,44 @@
    "fieldtype": "Table",
    "label": "Items",
    "options": "Shipped Items"
+  },
+  {
+   "fieldname": "fuel_cost",
+   "fieldtype": "Data",
+   "label": "Fuel Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "insurance_cost",
+   "fieldtype": "Data",
+   "label": "Insurance Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_extra_cost",
+   "fieldtype": "Data",
+   "label": "Total Extra Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_qpwi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hlkq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jhjd",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-05 23:19:10.448543",
+ "modified": "2025-12-10 23:06:59.609369",
  "modified_by": "Administrator",
  "module": "Click2Ship Core",
  "name": "Shipment Booking",
