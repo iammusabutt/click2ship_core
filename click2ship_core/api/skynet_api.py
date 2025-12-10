@@ -17,7 +17,7 @@ def get_auth_headers():
     }
     
 @frappe.whitelist(allow_guest=True)
-def get_shipping_rates():
+def rates():
     try:
         # Step 1: Get user input (quoteInput)
         raw_data = frappe.request.get_data(as_text=True)

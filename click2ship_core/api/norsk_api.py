@@ -1,3 +1,4 @@
+from click2ship_core.api.call import get_exchange_rate
 # File: click2ship_core/api/norsk_api.py
 
 import frappe
@@ -51,7 +52,7 @@ NORSK_SECRET_ACCESS_KEY = "Y3CX7TS7BPMJRMAEFYDJ6XJQ4TQTS65GEVRQNZ2WLUHHA2RX"
 # Fetch quotes from Norsk API
 # -------------------------------------------------------------
 @frappe.whitelist(allow_guest=True)
-def get_norsk_shipping_quote():
+def rates():
     settings = get_norsk_settings()
     try:
         # Step 1: Get user input (quoteInput)
@@ -102,7 +103,25 @@ def get_norsk_shipping_quote():
                 error_details = response.text
             frappe.throw(f"Quote API Error {response.status_code}: {error_details}")
 
-        return response.json()
+        response_data = response.json()
+        usd_rate = get_exchange_rate("GBP")
+
+        if usd_rate:
+            for quote in response_data.get("Quotes", []):
+                quote['TotalCost'] = round(quote['TotalCost'] * usd_rate, 2)
+                quote['BaseCost'] = round(quote['BaseCost'] * usd_rate, 2)
+                quote['FuelCost'] = round(quote['FuelCost'] * usd_rate, 2)
+                
+                # Apply rounding to extra costs if they exist
+                if "ExtraCosts" in quote:
+                    for key, value in quote["ExtraCosts"].items():
+                        if isinstance(value, (int, float)):
+                            quote["ExtraCosts"][key] = round(value * usd_rate, 2)
+                    quote["AdjustedTotalCost"] = round(quote["AdjustedTotalCost"] * usd_rate, 2)
+
+            response_data['Currency'] = "USD"
+        
+        return response_data
 
     except requests.exceptions.RequestException as req_err:
         frappe.log_error(frappe.get_traceback(), "Norsk Quote API Request Error")
@@ -198,6 +217,7 @@ def book_norsk_shipment():
         if not shipment_data:
             frappe.throw("Shipment data is missing or invalid.")
 
+        settings = get_norsk_settings()
         date = formatdate(timeval=None, localtime=False, usegmt=True)
         resource = "/api/shipment"
         content_type = "application/json"
@@ -206,13 +226,13 @@ def book_norsk_shipment():
         string_to_sign = f"POST\n{body_md5}\n{content_type}\n{date}\n{resource}"
         signature = base64.b64encode(
             hmac.new(
-                key=NORSK_SECRET_ACCESS_KEY.encode('utf-8'),
+                key=settings['secret_access_key'].encode('utf-8'),
                 msg=string_to_sign.encode('utf-8'),
                 digestmod=hashlib.sha1
             ).digest()
         ).decode('utf-8')
 
-        auth_header = f"{NORSK_ACCESS_KEY_ID}:{signature}"
+        auth_header = f"{settings['access_key']}:{signature}"
 
         headers = {
             "Authorization": auth_header,
@@ -222,7 +242,7 @@ def book_norsk_shipment():
         }
 
         response = requests.post(
-            "http://dev-api.norsk-global.com/api/shipment",
+            f"{settings['api_url']}shipment",
             headers=headers,
             data=shipment_data
         )

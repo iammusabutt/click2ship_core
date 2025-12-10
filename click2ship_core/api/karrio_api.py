@@ -108,7 +108,7 @@ def _get_valid_token():
 
 
 @frappe.whitelist(allow_guest=True)
-def get_rates():
+def rates():
     # -----------------------------------------------
     # STEP 1 — Parse incoming request
     # -----------------------------------------------
@@ -227,7 +227,7 @@ def get_rates():
         settings.access_token = None
         settings.save(ignore_permissions=True)
         frappe.db.commit()
-        return get_rates()
+        return rates()
 
     # Karrio returns structured error JSON → return parsed error
     try:

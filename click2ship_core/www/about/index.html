@@ -66,7 +66,7 @@
 
     try {
       const res = await fetch(
-        "/api/method/click2ship_core.api.skynet_api.get_shipping_rates",
+        "/api/method/click2ship_core.api.skynet_api.rates",
         {
           method: "POST",
           headers: {
@@ -130,7 +130,7 @@ document.getElementById("karrio-quotes-btn").addEventListener("click", () => {
         ]
     };
 
-    fetch("/api/method/click2ship_core.api.karrio_api.get_rates", {
+    fetch("/api/method/click2ship_core.api.karrio_api.rates", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

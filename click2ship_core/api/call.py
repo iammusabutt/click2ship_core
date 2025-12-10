@@ -27,19 +27,19 @@ def rates():
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future_norsk = executor.submit(
                 call_internal_api,
-                "click2ship_core.api.norsk_api.get_norsk_shipping_quote",
+                "click2ship_core.api.norsk_api.rates",
                 quote_input,
                 base_url
             )
             future_skynet = executor.submit(
                 call_internal_api,
-                "click2ship_core.api.skynet_api.get_shipping_rates",
+                "click2ship_core.api.skynet_api.rates",
                 quote_input,
                 base_url
             )
             future_karrio = executor.submit(
                 call_internal_api,
-                "click2ship_core.api.karrio_api.get_rates",
+                "click2ship_core.api.karrio_api.rates",
                 quote_input,
                 base_url
             )
@@ -107,18 +107,18 @@ def normalize_quotes(raw_data, provider, via="uk"):
         base_total = float(q.get("TotalCost", 0.0) or 0.0)
 
         # Use rates from settings
-        air_freight_cost = float(fm_settings["air_freight_cost"]) * weight
-        local_processing_cost = float(fm_settings["local_processing_cost"])
-        local_custom_charges = float(fm_settings["local_custom_charges"])
-        dest_tranship_clearance = float(fm_settings["transshipping_clearance"]) * weight
+        air_freight_cost = round(float(fm_settings["air_freight_cost"]) * weight, 2)
+        local_processing_cost = round(float(fm_settings["local_processing_cost"]), 2)
+        local_custom_charges = round(float(fm_settings["local_custom_charges"]), 2)
+        dest_tranship_clearance = round(float(fm_settings["transshipping_clearance"]) * weight, 2)
 
-        extra_total = (
+        extra_total = round(
             air_freight_cost +
             local_processing_cost +
             local_custom_charges +
-            dest_tranship_clearance
+            dest_tranship_clearance, 2
         )
-        new_total = base_total + extra_total
+        new_total = round(base_total + extra_total, 2)
 
         q["ExtraCosts"] = {
             "AirFreightCost": air_freight_cost,
@@ -280,6 +280,13 @@ def session_data():
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "session_data error")
         return {"status": "error", "message": str(e)}
+
+
+def get_exchange_rate(base_currency="GBP"):
+    url = f"https://v6.exchangerate-api.com/v6/a378b4b8782eb773834465cf/latest/{base_currency}"
+    response = requests.get(url)
+    data = response.json()
+    return data.get("conversion_rates", {}).get("USD")
 
 
 @frappe.whitelist(allow_guest=True)
