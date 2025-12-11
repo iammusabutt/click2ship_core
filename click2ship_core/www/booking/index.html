@@ -542,6 +542,9 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
 
     // Additional Info
     const country_of_manufacture = document.querySelector('[name="CustomsCountryOfManufacture"]').value.trim();
+    const package_contents = document.querySelector('[name="PackageContents"]').value.trim();
+    const courier_notes = document.querySelector('[name="CourierNotes"]').value.trim();
+    const custom_export_reason = document.querySelector('[name="CustomsExportReason"]').value.trim();
 
     // Item Lines
     const itemLines = [];
@@ -662,14 +665,14 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
                 ReceiverKycNumber: ""
             },
             PackageDetails: {
-                GoodsDescription: additionalData.PackageContents,
+                GoodsDescription: package_contents,
                 CustomValue: parseFloat(document.getElementById('grand-total').textContent) || 0,
                 CustomCurrencyCode: "USD",
                 InsuranceValue: "0.00",
                 InsuranceCurrencyCode: "USD",
                 ShipmentTerm: "",
                 GoodsOriginCountryCode: shipperData.CountryCode,
-                DeliveryInstructions: additionalData.CourierNotes,
+                DeliveryInstructions: courier_notes,
                 Weight: total_weight,
                 WeightMeasurement: "KG",
                 NoOfItems: itemLines.length,
@@ -718,7 +721,7 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
                 OriginLocCode: "",
                 BagNumber: 0,
                 DeadWeight: total_weight,
-                ReasonExport: additionalData.CustomsExportReason,
+                ReasonExport: custom_export_reason,
                 DestTaxes: 0.0,
                 Security: 0.0,
                 Surcharge: 0.0,

@@ -54,11 +54,14 @@
   "local_processing_cost",
   "local_custom_charges",
   "transhipping_clearance",
-  "total_extra_cost",
   "section_break_qpwi",
   "column_break_hlkq",
-  "column_break_jhjd",
   "total_cost_without_additional_cost",
+  "column_break_jhjd",
+  "total_extra_cost",
+  "section_break_djsi",
+  "column_break_awms",
+  "column_break_lane",
   "grand_total_including_additional_cost"
  ],
  "fields": [
@@ -349,11 +352,23 @@
   {
    "fieldname": "column_break_jhjd",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_djsi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_awms",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lane",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-10 23:06:59.609369",
+ "modified": "2025-12-11 16:56:07.362062",
  "modified_by": "Administrator",
  "module": "Click2Ship Core",
  "name": "Shipment Booking",

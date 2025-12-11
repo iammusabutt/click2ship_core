@@ -82,7 +82,7 @@ def rates():
         }
 
         # Step 3: Add dynamic shipping date
-        shipping_date = (datetime.datetime.utcnow() + datetime.timedelta(minutes=30)).isoformat() + "Z"
+        shipping_date = (datetime.datetime.utcnow() + datetime.timedelta(minutes=60)).isoformat() + "Z"
         quote_data["ShippingDate"] = shipping_date
 
         updated_payload = json.dumps(quote_data).encode('utf-8')
@@ -190,8 +190,8 @@ def store_shipment_details(doc, session_data):
     doc.receiver_fax = receiver.get("Fax")
 
     # Map financial details
-    doc.base_cost = quote.get("BaseCost")
-    doc.fuel_cost = quote.get("FuelCost")
+    doc.base_cost = quote.get("BaseCost") or ""
+    doc.fuel_cost = quote.get("FuelCost") or ""
     doc.insurance_cost = ""
     doc.air_freight_cost = quote.get("ExtraCosts", {}).get("AirFreightCost")
     doc.local_processing_cost = quote.get("ExtraCosts", {}).get("LocalProcessingCost")
